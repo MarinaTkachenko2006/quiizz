@@ -3,11 +3,11 @@ class User < ApplicationRecord
 
   validates :nickname, presence: true, 
                        uniqueness: true, 
-                       length: { minimum: 3, maximum: 50 }
+                       length: { minimum: 4, maximum: 20 }
   validates :email, presence: true, 
                     uniqueness: true, 
                     format: { with: URI::MailTo::EMAIL_REGEXP }
-  validates :password, length: { minimum: 6 }, if: -> { new_record? || password.present? }
+  validates :password, length: { minimum: 8 }, if: -> { new_record? || password.present? }
 
   has_many :quizzes, foreign_key: 'author_id', dependent: :nullify
   has_many :scores, dependent: :destroy

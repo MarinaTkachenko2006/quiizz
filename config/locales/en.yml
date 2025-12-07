@@ -29,3 +29,28 @@
 
 en:
   hello: "Hello world"
+ru:
+  activerecord:
+    attributes:
+      user:
+        nickname: "Имя пользователя"
+        email: "Email"
+        password: "Пароль"
+        password_confirmation: "Подтверждение пароля"
+    errors:
+      models:
+        user:
+          attributes:
+            nickname:
+              blank: "не может быть пустым"
+              too_short: "должно содержать не менее %{count} символов"
+              taken: "уже занято"
+            email:
+              blank: "не может быть пустым"
+              invalid: "имеет неверный формат"
+              taken: "уже зарегистрирован"
+            password:
+              blank: "не может быть пустым"
+              too_short: "должен содержать не менее %{count} символов"
+            password_confirmation:
+              confirmation: "не совпадает с паролем"
