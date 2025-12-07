@@ -15,6 +15,11 @@ Rails.application.routes.draw do
   resources :quizzes, only: [:new, :create, :index, :show, :destroy]
   resources :users, only: [:new, :create]
 
+  get "profile", to: "users#show", as: :profile
+  get "profile/edit", to: "users#edit", as: :edit_profile
+  patch "profile", to: "users#update"
+  get "profile/change_password", to: "users#change_password", as: :change_password_profile
+  patch "profile/update_password", to: "users#update_password", as: :update_password_profile
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

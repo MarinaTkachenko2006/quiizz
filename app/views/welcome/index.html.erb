@@ -1,7 +1,14 @@
-<h1>Добро пожаловать на Quizz</h1>
+<h1>Добро пожаловать на квиз</h1>
 
 <% if logged_in? %>
-  <p>Вы вошли как: <%= current_user.nickname %></p>
+  <p>Вы вошли как: <strong><%= current_user.nickname %></strong></p>
+  
+  <div style="margin: 20px 0;">
+    <%= link_to "Личный кабинет", profile_path, style: "margin-right: 10px;" %>
+    <%= link_to "Все квизы", quizzes_path, style: "margin-right: 10px;" %>
+    <%= link_to "Создать квиз", new_quiz_path, style: "margin-right: 10px;" %>
+  </div>
+  
   <%= button_to "Выйти", logout_path, method: :delete %>
 <% else %>
   <p>

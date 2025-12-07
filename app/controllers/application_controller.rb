@@ -16,4 +16,12 @@ class ApplicationController < ActionController::Base
   def logged_in?
     current_user.present?
   end
+
+  def require_login
+    unless logged_in?
+      flash[:alert] = "Пожалуйста, войдите в систему"
+      redirect_to login_path
+    end
+  end
+
 end
