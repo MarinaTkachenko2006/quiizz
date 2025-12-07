@@ -1,4 +1,5 @@
 class Quiz < ApplicationRecord
+  belongs_to :author, class_name: 'User'
   has_many :questions, dependent: :destroy
 
   accepts_nested_attributes_for :questions,
