@@ -34,7 +34,24 @@
             <a href="<%= root_path %>"
               class="text-4xl font-bold text-white">Quiizz</a>
           </div>
-          
+          <div>
+            <% if logged_in? %>
+              <p>Вы вошли как: <strong><%= current_user.nickname %></strong></p>
+              
+              <div style="margin: 20px 0;">
+                <%= link_to "Личный кабинет", profile_path, style: "margin-right: 10px;" %>
+                <%= link_to "Все квизы", quizzes_path, style: "margin-right: 10px;" %>
+                <%= link_to "Создать квиз", new_quiz_path, style: "margin-right: 10px;" %>
+              </div>
+              
+              <%= button_to "Выйти", logout_path, method: :delete %>
+            <% else %>
+              <p>
+                <%= link_to "Регистрация", register_path %> |
+                <%= link_to "Авторизация", login_path %>
+              </p>
+            <% end %>
+          </div>
         </div>
       </div>
     </nav>
