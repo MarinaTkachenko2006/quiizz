@@ -46,45 +46,58 @@
 
 <script>
 
-  let questionCounter = <%= @quiz.questions.size || 0 %>;
-  let answerCounters = {};
+   if (typeof questionCounter === 'undefined') {
+    questionCounter = <%= @quiz.questions.size || 0 %>;
+  }
+  
+  if (typeof answerCounters === 'undefined') {
+    answerCounters = {};
+  }
   
   document.addEventListener('DOMContentLoaded', function() {
-    const questions = document.querySelectorAll('.question-item');
-    questions.forEach((question) => {
-      const questionIndex = getQuestionIndex(question);
-      if (questionIndex !== null) {
-        const answers = question.querySelectorAll('.answer-item').length;
-        answerCounters[questionIndex] = answers;
-        if (questionIndex > questionCounter) {
-          questionCounter = questionIndex;
+    if (Object.keys(answerCounters).length === 0) {
+      const questions = document.querySelectorAll('.question-item');
+      questions.forEach((question) => {
+        const questionIndex = getQuestionIndex(question);
+        if (questionIndex !== null) {
+          const answers = question.querySelectorAll('.answer-item').length;
+          answerCounters[questionIndex] = answers;
+          if (questionIndex > questionCounter) {
+            questionCounter = questionIndex;
+          }
         }
+      });
+      
+      if (questions.length === 0) {
+        questionCounter = 0;
       }
-    });
+    }
   });
 
   function addQuestion() {
-  questionCounter++;
-  const questionTemplate = document.getElementById('question-template').innerHTML;
-  
-  let newHtml = questionTemplate
-    .replace(/NEW_QUESTION_INDEX/g, questionCounter)
-    .replace(/NEW_ORDER_INDEX/g, questionCounter);
-  
-  const container = document.getElementById('questions-container');
-  container.insertAdjacentHTML('beforeend', newHtml);
-  
-  // Находим добавленный элемент и устанавливаем data-атрибут
-  const newQuestion = container.lastElementChild;
-  newQuestion.setAttribute('data-question-index', questionCounter);
-  
-  answerCounters[questionCounter] = 0;
-  addDefaultAnswers(questionCounter);
-}
-
+    questionCounter++;
+    const questionTemplate = document.getElementById('question-template').innerHTML;
+    
+    let newHtml = questionTemplate
+      .replace(/NEW_QUESTION_INDEX/g, questionCounter)
+      .replace(/NEW_ORDER_INDEX/g, questionCounter);
+    
+    document.getElementById('questions-container').insertAdjacentHTML('beforeend', newHtml);
+    
+    const newQuestion = document.querySelector(`[name="quiz[questions_attributes][${questionCounter}][text]"]`)
+                      .closest('.question-item');
+    if (newQuestion) {
+      newQuestion.setAttribute('data-question-index', questionCounter);
+    }
+    
+    answerCounters[questionCounter] = 0;
+    addDefaultAnswers(questionCounter);
+  }
   
   function addDefaultAnswers(questionIndex) {
-    addAnswerToQuestion(questionIndex);
+    for (let i = 0; i < 1; i++) {
+      addAnswerToQuestion(questionIndex);
+    }
   }
 
   function removeQuestion(button) {
@@ -99,85 +112,68 @@
   }
 
   function addAnswer(button) {
-  const questionItem = button.closest('.question-item');
-  if (!questionItem) return;
-  
-  const questionIndex = getQuestionIndex(questionItem);
-  if (questionIndex === null) return;
-  
-  addAnswerToQuestion(questionIndex);
-}
+    const questionItem = button.closest('.question-item');
+    const questionIndex = getQuestionIndex(questionItem);
+    
+    if (questionIndex !== null) {
+      addAnswerToQuestion(questionIndex);
+    }
+  }
 
   function addAnswerToQuestion(questionIndex) {
-  const answerIndex = answerCounters[questionIndex] || 0;
-  const answerTemplate = document.getElementById('answer-template').innerHTML;
-  
-  let newAnswerHtml = answerTemplate
-    .replace(/QUESTION_INDEX/g, questionIndex)
-    .replace(/ANSWER_INDEX/g, answerIndex);
+    const answerIndex = answerCounters[questionIndex] || 0;
+    const answerTemplate = document.getElementById('answer-template').innerHTML;
+    
+    let newAnswerHtml = answerTemplate
+      .replace(/QUESTION_INDEX/g, questionIndex)
+      .replace(/ANSWER_INDEX/g, answerIndex);
 
-  // Находим контейнер для ответов
-  const questions = document.querySelectorAll('.question-item');
-  let targetContainer = null;
-  
-  // Ищем вопрос по индексу через name атрибут textarea
-  questions.forEach((question) => {
-    const textarea = question.querySelector(`textarea[name="quiz[questions_attributes][${questionIndex}][text]"]`);
-    if (textarea) {
-      targetContainer = question.querySelector('.answers-container');
-    }
-  });
-  
-  if (targetContainer) {
-    targetContainer.insertAdjacentHTML('beforeend', newAnswerHtml);
-    answerCounters[questionIndex] = (answerCounters[questionIndex] || 0) + 1;
-  }
-}
-
-// Также добавьте начальную инициализацию в DOMContentLoaded:
-document.addEventListener('DOMContentLoaded', function() {
-  // Инициализируем счетчики для существующих вопросов
-  const questions = document.querySelectorAll('.question-item');
-  
-  questions.forEach((question, questionIndex) => {
-    // Получаем индекс из существующего вопроса
-    const textarea = question.querySelector('textarea[name*="questions_attributes"]');
-    if (textarea) {
-      const match = textarea.name.match(/questions_attributes\[(\d+)\]/);
-      if (match) {
-        const index = parseInt(match[1]);
-        const answers = question.querySelectorAll('.answer-item').length;
-        answerCounters[index] = answers;
-        // Устанавливаем data-атрибут для удобства
-        question.setAttribute('data-question-index', index);
+    const questionItem = document.querySelector(`[data-question-index="${questionIndex}"]`);
+    if (questionItem) {
+      const container = questionItem.querySelector('.answers-container');
+      if (container) {
+        container.insertAdjacentHTML('beforeend', newAnswerHtml);
+        answerCounters[questionIndex] = answerIndex + 1;
+      }
+    } else {
+      const textarea = document.querySelector(`textarea[name="quiz[questions_attributes][${questionIndex}][text]"]`);
+      if (textarea) {
+        const container = textarea.closest('.question-item').querySelector('.answers-container');
+        if (container) {
+          container.insertAdjacentHTML('beforeend', newAnswerHtml);
+          answerCounters[questionIndex] = answerIndex + 1;
+        }
       }
     }
-  });
-  
-  // Обновляем questionCounter
-  const maxIndex = Math.max(...Object.keys(answerCounters).map(k => parseInt(k)), -1);
-  questionCounter = maxIndex + 1;
-});
+  }
   
   function removeAnswer(button) {
     const answerItem = button.closest('.answer-item');
     if (answerItem) {
       answerItem.remove();
+
+      const questionItem = answerItem.closest('.question-item');
+      if (questionItem) {
+        const questionIndex = getQuestionIndex(questionItem);
+        if (questionIndex !== null) {
+          const answersCount = questionItem.querySelectorAll('.answer-item').length;
+          answerCounters[questionIndex] = answersCount;
+        }
+      }
     }
   }
   
   function getQuestionIndex(questionElement) {
-  // Сначала проверяем data-атрибут
-  if (questionElement.hasAttribute('data-question-index')) {
-    return parseInt(questionElement.getAttribute('data-question-index'));
+    const dataIndex = questionElement.getAttribute('data-question-index');
+    if (dataIndex) {
+      return parseInt(dataIndex);
+    }
+    
+    const textarea = questionElement.querySelector('textarea[name*="questions_attributes"]');
+    if (textarea) {
+      const match = textarea.name.match(/questions_attributes\[(\d+)\]/);
+      return match ? parseInt(match[1]) : null;
+    }
+    return null;
   }
-  
-  // Если data-атрибута нет, ищем в textarea
-  const textarea = questionElement.querySelector('textarea[name*="questions_attributes"]');
-  if (textarea) {
-    const match = textarea.name.match(/questions_attributes\[(\d+)\]/);
-    return match ? parseInt(match[1]) : null;
-  }
-  return null;
-}
 </script>

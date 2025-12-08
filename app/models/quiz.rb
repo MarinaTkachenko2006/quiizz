@@ -16,4 +16,14 @@ class Quiz < ApplicationRecord
   def question_count
     questions.count
   end
+
+    before_validation :set_questions_order
+  
+  private
+  
+  def set_questions_order
+    questions.each_with_index do |question, index|
+      question.order_index = index + 1 if question.order_index.blank?
+    end
+  end
 end

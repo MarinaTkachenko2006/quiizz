@@ -1,0 +1,104 @@
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+      <% if @quizzes.any? %>
+        <ul class="divide-y divide-gray-200">
+          <% @quizzes.each do |quiz| %>
+            <li class="hover:bg-gray-50 transition-colors duration-150">
+              <button 
+                type="button" 
+                onclick="openQuizModal(<%= quiz.id %>, '<%= j(quiz.title) %>', '<%= j(quiz.description || 'No description') %>')"
+                class="w-full text-left px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-gray-50"
+              >
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="text-lg font-medium text-gray-900"><%= quiz.title %></h3>
+                    <div class="flex items-center mt-1 text-sm text-gray-500">
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span><%= quiz.created_at.strftime("%b %d, %Y") %></span>
+                      <span class="mx-2">•</span>
+                      <span><%= quiz.questions.count %> questions</span>
+                    </div>
+                  </div>
+                  <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No quizzes yet</h3>
+          <p class="mt-1 text-sm text-gray-500">Be the first to create a public quiz!</p>
+        </div>
+      <% end %>
+</div>
+
+
+<div id="quizModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-gray-500/30" onclick="closeQuizModal()"></div>
+
+  <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md">
+
+    <div class="px-6 pt-6">
+      <h3 id="modalTitle" class="text-xl font-bold text-gray-900 mb-2"></h3>
+    </div>
+
+    <div class="px-6 py-4">
+      <div class="bg-gray-50 p-4 rounded-lg">
+        <p id="modalDescription" class="text-gray-700"></p>
+      </div>
+    </div>
+    
+    <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end space-x-3">
+      <button 
+        onclick="closeQuizModal()"
+        class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+      >
+        Close
+      </button>
+      <button 
+        onclick="joinQuiz()"
+        class="px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-md transition-colors"
+      >
+        Join Quiz
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentQuizId = null;
+
+  function openQuizModal(quizId, title, description) {
+    currentQuizId = quizId;
+    
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDescription').textContent = description || 'No description provided';
+    
+    document.getElementById('quizModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeQuizModal() {
+    document.getElementById('quizModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    currentQuizId = null;
+  }
+
+  function joinQuiz() {
+    if (currentQuizId) {
+       window.location.href = `/quizzes/${currentQuizId}`;
+    }
+  }
+
+  // Закрытие по ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeQuizModal();
+  });
+</script>

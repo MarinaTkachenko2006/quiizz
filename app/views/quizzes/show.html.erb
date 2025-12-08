@@ -1,0 +1,322 @@
+<div id="quiz-container" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+      <div class="flex justify-between items-start">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @quiz.title %></h1>
+          <% if @quiz.description.present? %>
+            <p class="text-gray-600"><%= @quiz.description %></p>
+          <% end %>
+        </div>
+        
+        <div id="timer-container" class="hidden">
+          <div class="text-center">
+            <div class="text-sm text-gray-500 mb-1">Time remaining</div>
+            <div id="timer" class="text-2xl font-bold text-emerald-600">00:30</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-6">
+        <div class="flex justify-between text-sm text-gray-600 mb-2">
+          <span>Question <span id="current-question">1</span> of <%= @questions.count %></span>
+          <span><span id="score">0</span> points</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="questions-container">
+      <% @questions.each_with_index do |question, index| %>
+        <div id="question-<%= question.id %>" class="question-card <%= index == 0 ? '' : 'hidden' %>" 
+             data-question-id="<%= question.id %>" 
+             data-time-limit="<%= question.time_limit %>"
+             data-correct-answers="<%= question.correct_answer_count %>">
+          
+          <div class="bg-white rounded-2xl shadow-lg p-8">
+            <div class="mb-8">
+              <div class="flex items-center mb-4">
+                <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-800 rounded-full text-lg font-bold mr-4">
+                  <%= index + 1 %>
+                </span>
+                <h2 class="text-2xl font-bold text-gray-900"><%= question.text %></h2>
+              </div>
+              
+              <div class="flex items-center text-gray-500 text-sm mt-2">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="mr-4"><%= question.time_limit %> seconds</span>
+                
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><%= question.reward %> points</span>
+              </div>
+            </div>
+
+            <div id="answers-<%= question.id %>" class="space-y-4">
+                <% question.answers.shuffle.each.with_index do |answer, index| %>
+                    <button type="button" 
+                            class="answer-btn w-full text-left p-4 bg-gray-50 hover:bg-gray-100 border-2 border-transparent hover:border-gray-300 rounded-xl transition-all duration-200"
+                            data-answer-id="<%= answer.id %>"
+                            data-is-correct="<%= answer.is_correct %>"
+                            onclick="selectAnswer(this, <%= answer.id %>, <%= answer.is_correct %>, <%= question.id %>)">
+                    <div class="flex items-center">
+                        <div class="answer-circle flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 mr-4 transition-all duration-200">
+                        <span class="text-gray-600 font-medium">
+                            <%= ('A'..'Z').to_a[index] %>
+                        </span>
+                        </div>
+                        <span class="text-lg text-gray-800"><%= answer.answer_text %></span>
+                        
+                        <div class="ml-auto hidden">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        </div>
+                    </div>
+                    </button>
+                <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div id="results-container" class="hidden">
+      <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+        <div class="mb-8">
+          <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 rounded-full mb-6">
+            <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Quiz Completed!</h2>
+          <p class="text-gray-600 text-lg">You've finished <strong><%= @quiz.title %></strong></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div class="bg-blue-50 p-6 rounded-xl">
+            <div class="text-4xl font-bold text-blue-600" id="final-correct">0</div>
+            <div class="text-blue-500 mt-2">Correct Answers</div>
+          </div>
+          
+          <div class="bg-emerald-50 p-6 rounded-xl">
+            <div class="text-4xl font-bold text-emerald-600" id="final-score">0</div>
+            <div class="text-emerald-500 mt-2">Total Points</div>
+          </div>
+          
+          <div class="bg-purple-50 p-6 rounded-xl">
+            <div class="text-4xl font-bold text-purple-600" id="final-questions"><%= @questions.count %></div>
+            <div class="text-purple-500 mt-2">Total Questions</div>
+          </div>
+        </div>
+
+        <div class="flex justify-center space-x-4">
+          <%= link_to "Back to Quizzes", quizzes_path, 
+              class: "px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200" %>
+          
+          <%= link_to "Take Another Quiz", quizzes_path, 
+              class: "px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors duration-200" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentQuestionNumber = 1;
+  let totalQuestions = <%= @questions.count %>;
+  let score = 0;
+  let correctAnswersCount = 0;
+  let timer = null;
+  let selectedAnswers = [];
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    startTimer();
+  });
+  
+  function startTimer() {
+    const currentQuestion = document.querySelector('.question-card:not(.hidden)');
+    if (!currentQuestion) return;
+    
+    const timeLimit = parseInt(currentQuestion.dataset.timeLimit);
+    const questionId = currentQuestion.dataset.questionId;
+    
+    document.getElementById('timer-container').classList.remove('hidden');
+    
+    let timeLeft = timeLimit;
+    updateTimerDisplay(timeLeft);
+    
+    if (timer) clearInterval(timer);
+    
+    timer = setInterval(() => {
+      timeLeft--;
+      updateTimerDisplay(timeLeft);
+      
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        timeUp(questionId);
+      }
+    }, 1000);
+  }
+  
+  function updateTimerDisplay(seconds) {
+    const timerElement = document.getElementById('timer');
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    
+    if (seconds <= 10) {
+      timerElement.classList.remove('text-emerald-600');
+      timerElement.classList.add('text-red-600');
+    }
+  }
+  
+  function timeUp(questionId) {
+    const answerBtns = document.querySelectorAll(`#answers-${questionId} .answer-btn`);
+    
+    answerBtns.forEach(btn => {
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+    });
+    
+    answerBtns.forEach(btn => {
+      if (btn.dataset.isCorrect === 'true') {
+        btn.classList.add('border-green-500', 'bg-green-50');
+      }
+    });
+
+    setTimeout(() => {
+      goToNextQuestion();
+    }, 2000);
+  }
+  
+  function selectAnswer(button, answerId, isCorrect, questionId) {
+    const questionElement = document.getElementById(`question-${questionId}`);
+    const requiredAnswers = parseInt(questionElement.dataset.correctAnswers);
+    
+    if (button.classList.contains('selected')) {
+      button.classList.remove('selected', 'bg-blue-100', 'border-blue-400');
+      selectedAnswers = selectedAnswers.filter(id => id !== answerId);
+      return;
+    }
+    button.classList.add('selected', 'bg-blue-100', 'border-blue-400');
+    selectedAnswers.push(answerId);
+    
+    if (selectedAnswers.length >= requiredAnswers) {
+      setTimeout(() => {
+        checkAnswers(questionId);
+      }, 500);
+    }
+  }
+  
+  function checkAnswers(questionId) {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    
+    const questionElement = document.getElementById(`question-${questionId}`);
+    const answerBtns = document.querySelectorAll(`#answers-${questionId} .answer-btn`);
+    const requiredAnswers = parseInt(questionElement.dataset.correctAnswers);
+    const questionReward = parseInt(questionElement.dataset.reward) || 10;
+    
+    answerBtns.forEach(btn => {
+      btn.disabled = true;
+    });
+    
+    let correctSelected = 0;
+    let totalCorrect = 0;
+    
+    answerBtns.forEach(btn => {
+      const isCorrect = btn.dataset.isCorrect === 'true';
+      const wasSelected = selectedAnswers.includes(parseInt(btn.dataset.answerId));
+      
+      if (isCorrect) {
+        totalCorrect++;
+        btn.classList.add('border-green-500');
+        
+        if (wasSelected) {
+          correctSelected++;
+          btn.classList.add('bg-green-100');
+        } else {
+          btn.classList.add('bg-green-50');
+        }
+      } else if (wasSelected) {
+        btn.classList.add('border-red-300', 'bg-red-100');
+      }
+    });
+    
+    if (correctSelected === requiredAnswers && correctSelected === totalCorrect) {
+      score += questionReward;
+      correctAnswersCount++;
+      
+      document.getElementById('score').textContent = score;
+    }
+
+    setTimeout(() => {
+      goToNextQuestion();
+    }, 2000);
+  }
+  
+ function goToNextQuestion() {
+  const currentQuestion = document.querySelector('.question-card:not(.hidden)');
+  if (currentQuestion) {
+    currentQuestion.classList.add('hidden');
+  }
+  
+  currentQuestionNumber++;
+  
+  updateProgress();
+  
+  if (currentQuestionNumber > totalQuestions) {
+    document.getElementById('progress-bar').style.width = '100%';
+    document.getElementById('current-question').textContent = totalQuestions;
+    
+    showResults();
+    return;
+  }
+  
+  const nextQuestion = document.querySelector(`.question-card:nth-child(${currentQuestionNumber})`);
+  if (nextQuestion) {
+    nextQuestion.classList.remove('hidden');
+    selectedAnswers = [];
+    
+    startTimer();
+  }
+}
+  
+  function updateProgress() {
+    const progress = ((currentQuestionNumber - 1) / totalQuestions) * 100;
+    document.getElementById('progress-bar').style.width = `${progress}%`;
+    document.getElementById('current-question').textContent = currentQuestionNumber;
+  }
+  
+  function showResults() {
+
+    document.getElementById('questions-container').classList.add('hidden');
+    document.getElementById('timer-container').classList.add('hidden');
+
+    document.getElementById('results-container').classList.remove('hidden');
+    
+    document.getElementById('final-correct').textContent = correctAnswersCount;
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('final-questions').textContent = totalQuestions;
+  }
+</script>
+
+<style>
+  .answer-btn:disabled {
+    cursor: not-allowed;
+  }
+  
+  .answer-btn.selected {
+    border-color: #3b82f6 !important;
+    background-color: #dbeafe !important;
+  }
+</style>

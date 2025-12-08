@@ -4,16 +4,16 @@ class QuizzesController < ApplicationController
   before_action :is_author, only: [:destroy]
 
   def index
-    @quizzes = Quiz.where(is_public: true).order(created_at: :desc)
+    @quizzes = Quiz.where(is_public: true).order(created_at: :desc) || []
   end
 
   def show
-    @questions = @quiz.questions.includes(:answers).order(:order_index)
+    @quiz = Quiz.find(params[:id])
+  @questions = @quiz.questions.includes(:answers).order(:order_index)
   end
 
   def new
     @quiz = Quiz.new
-    @quiz.author_id = 0
     @quiz.questions.build(
       order_index: 1,
       reward: 10,
@@ -24,11 +24,10 @@ class QuizzesController < ApplicationController
 
   def create
     @quiz = Quiz.new(quiz_params)
-    
-    set_questions_order
-    
+    @quiz.author_id = session[:user_id]
+
     if @quiz.save
-      redirect_to @quiz, notice: 'Quiz created'
+      redirect_to root_path, notice: 'Quiz created'
     else
       flash.now[:alert] = 'Could not create the quiz'
       render :new, status: :unprocessable_entity
@@ -47,10 +46,18 @@ class QuizzesController < ApplicationController
   end
 
   def is_author
+    unless session[:user_id]=:author_id
+      redirect_to root_path, alert: 'Only author can modify quiz'
+      return false
+    end
     true
   end
   
   def user_autorized
+    unless session[:user_id]
+      redirect_to login_path, alert: 'Please log in to access this page'
+      return false
+    end
     true
   end
 
@@ -62,7 +69,7 @@ class QuizzesController < ApplicationController
       questions_attributes: [
         :id,
         :text,
-        :order_index,
+        :order_index, 
         :reward,
         :time_limit,
         :_destroy,
@@ -76,9 +83,4 @@ class QuizzesController < ApplicationController
     )
   end
 
-  def set_questions_order
-    @quiz.questions.each_with_index do |question, index|
-      question.order_index = index + 1 if question.order_index.blank?
-    end
-  end
 end

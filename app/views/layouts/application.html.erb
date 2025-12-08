@@ -36,15 +36,15 @@
           </div>
           <div>
             <% if logged_in? %>
-              <p>Вы вошли как: <strong><%= current_user.nickname %></strong></p>
-              
-              <div style="margin: 20px 0;">
+            <div style="margin: 20px 0;">
+                <p>Вы вошли как: <strong><%= current_user.nickname %></strong></p>
                 <%= link_to "Личный кабинет", profile_path, style: "margin-right: 10px;" %>
                 <%= link_to "Все квизы", quizzes_path, style: "margin-right: 10px;" %>
                 <%= link_to "Создать квиз", new_quiz_path, style: "margin-right: 10px;" %>
+                <%= button_to "Выйти", logout_path, method: :delete %>
               </div>
               
-              <%= button_to "Выйти", logout_path, method: :delete %>
+              
             <% else %>
               <p>
                 <%= link_to "Регистрация", register_path %> |
