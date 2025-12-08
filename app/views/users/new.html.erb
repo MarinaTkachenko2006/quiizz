@@ -1,0 +1,50 @@
+<h1>Регистрация</h1>
+
+<%= form_with model: @user, url: register_path do |form| %>
+  <div>
+    <%= form.label :nickname, "Имя пользователя" %>
+    <%= form.text_field :nickname %>
+    <% if @user.errors[:nickname].any? %>
+      <div style="color: red; margin-top: 5px;">
+        <%= @user.errors[:nickname].map { |msg| "• #{msg}" }.join('<br>').html_safe %>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :email, "Почта" %>
+    <%= form.email_field :email %>
+    <% if @user.errors[:email].any? %>
+      <div style="color: red; margin-top: 5px;">
+        <%= @user.errors[:email].map { |msg| "• #{msg}" }.join('<br>').html_safe %>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :password, "Пароль" %>
+    <%= form.password_field :password %>
+    <% if @user.errors[:password].any? %>
+      <div style="color: red; margin-top: 5px;">
+        <%= @user.errors[:password].map { |msg| "• #{msg}" }.join('<br>').html_safe %>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :password_confirmation, "Подтверждение пароля" %>
+    <%= form.password_field :password_confirmation %>
+    <% if @user.errors[:password_confirmation].any? %>
+      <div style="color: red; margin-top: 5px;">
+        <%= @user.errors[:password_confirmation].map { |msg| "• #{msg}" }.join('<br>').html_safe %>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.submit "Зарегистрироваться" %>
+  </div>
+
+<% end %>
+
+<p>Уже есть аккаунт? <%= link_to "Войти", login_path %></p>

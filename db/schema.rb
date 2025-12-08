@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_05_162527) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_07_151558) do
   create_table "answers", force: :cascade do |t|
     t.string "answer_text", null: false
     t.datetime "created_at", null: false
@@ -37,5 +37,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_05_162527) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.index ["title"], name: "index_quizzes_on_title", unique: true
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "created_time", default: -> { "CURRENT_TIMESTAMP" }
+    t.string "email", null: false
+    t.string "nickname", null: false
+    t.string "password_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["nickname"], name: "index_users_on_nickname", unique: true
   end
 end

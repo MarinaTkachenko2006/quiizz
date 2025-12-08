@@ -1,0 +1,39 @@
+<h1>Личный кабинет</h1>
+
+<h2>Информация о профиле</h2>
+  
+<div style="margin-bottom: 15px;">
+  <strong>Имя пользователя:</strong> <%= @user.nickname %>
+</div>
+  
+<div style="margin-bottom: 15px;">
+  <strong>Email:</strong> <%= @user.email %>
+</div>
+  
+<div style="margin-bottom: 15px;">
+  <strong>Дата регистрации:</strong> <%= @user.created_at.strftime("%d.%m.%Y %H:%M") %>
+</div>
+  
+<div style="margin-bottom: 15px;">
+  <strong>Последнее обновление:</strong> <%= @user.updated_at.strftime("%d.%m.%Y %H:%M") %>
+</div>
+
+<!--
+<div style="margin-bottom: 20px;">
+  <strong>Статистика:</strong>
+  <ul>
+    <li>Создано квизов: <%= @user.quizzes.count %></li>
+    <li>Пройдено квизов: 0</li>
+    <li>Набрано очков: 0</li>
+  </ul>
+</div>
+-->
+  
+<div style="margin-top: 25px;">
+  <%= link_to "Редактировать профиль", edit_profile_path, style: "margin-right: 10px;" %>
+  <%= link_to "Сменить пароль", change_password_profile_path %>
+</div>
+
+<div style="margin-top: 20px;">
+  <%= link_to "На главную", root_path %>
+</div>

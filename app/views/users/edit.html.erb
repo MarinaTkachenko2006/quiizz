@@ -1,0 +1,31 @@
+<h1>Редактирование профиля</h1>
+
+<%= form_with model: @user, url: profile_path, method: :patch do |form| %>
+  <% if @user.errors.any? %>
+    <div style="color: red; margin-bottom: 15px;">
+      <strong>Ошибки:</strong>
+      <ul>
+        <% @user.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :nickname, "Имя пользователя" %>
+    <%= form.text_field :nickname %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :email, "Почта" %>
+    <%= form.email_field :email %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.submit "Сохранить изменения" %>
+    <%= link_to "Отмена", profile_path, style: "margin-left: 10px;" %>
+  </div>
+<% end %>
+
+<p><%= link_to "Назад в личный кабинет", profile_path %></p>

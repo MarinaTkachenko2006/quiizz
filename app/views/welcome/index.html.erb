@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="min-h-screen bg-gray-50 py-8 px-4">
   <div class="max-w-7xl mx-auto">
     <div class="text-center mb-8">
@@ -105,3 +106,23 @@
     <% end %>
   </div>
 </div>
+=======
+<h1>Добро пожаловать на квиз</h1>
+
+<% if logged_in? %>
+  <p>Вы вошли как: <strong><%= current_user.nickname %></strong></p>
+  
+  <div style="margin: 20px 0;">
+    <%= link_to "Личный кабинет", profile_path, style: "margin-right: 10px;" %>
+    <%= link_to "Все квизы", quizzes_path, style: "margin-right: 10px;" %>
+    <%= link_to "Создать квиз", new_quiz_path, style: "margin-right: 10px;" %>
+  </div>
+  
+  <%= button_to "Выйти", logout_path, method: :delete %>
+<% else %>
+  <p>
+    <%= link_to "Регистрация", register_path %> |
+    <%= link_to "Авторизация", login_path %>
+  </p>
+<% end %>
+>>>>>>> create_user

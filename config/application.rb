@@ -2,6 +2,7 @@ require_relative "boot"
 
 require "rails/all"
 
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
@@ -15,6 +16,13 @@ module Quiizz
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+
+    config.i18n.default_locale = :ru
+    config.i18n.available_locales = [:ru, :en]
+    config.i18n.fallbacks = true
+    
+    config.time_zone = 'Moscow'
+    config.active_record.default_timezone = :local
 
     # Configuration for the application, engines, and railties goes here.
     #
