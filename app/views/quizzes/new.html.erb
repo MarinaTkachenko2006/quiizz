@@ -1,0 +1,183 @@
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Create new quiz</h1>
+      <p class="mt-2 text-gray-600">Add content</p>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <%= form_with(model: @quiz, id: "quiz-form") do |f| %>
+        <%= render "quiz_fields", f: f %>
+        
+        <div class="mb-8">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Questions</h2>
+            <button type="button" 
+                    onclick="addQuestion()"
+                    class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Add question
+            </button>
+          </div>
+
+          <div id="questions-container" class="space-y-6">
+            <%= f.fields_for :questions do |question_fields| %>
+              <%= render "question_fields", f: question_fields %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+          <%= link_to "Cancel", root_path, 
+                      class: "px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" %>
+          
+          <%= f.submit "Create quiz", 
+                       class: "px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= render "question_template" %>
+<%= render "answer_template" %>
+
+<script>
+
+  let questionCounter = <%= @quiz.questions.size || 0 %>;
+  let answerCounters = {};
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const questions = document.querySelectorAll('.question-item');
+    questions.forEach((question) => {
+      const questionIndex = getQuestionIndex(question);
+      if (questionIndex !== null) {
+        const answers = question.querySelectorAll('.answer-item').length;
+        answerCounters[questionIndex] = answers;
+        if (questionIndex > questionCounter) {
+          questionCounter = questionIndex;
+        }
+      }
+    });
+  });
+
+  function addQuestion() {
+  questionCounter++;
+  const questionTemplate = document.getElementById('question-template').innerHTML;
+  
+  let newHtml = questionTemplate
+    .replace(/NEW_QUESTION_INDEX/g, questionCounter)
+    .replace(/NEW_ORDER_INDEX/g, questionCounter);
+  
+  const container = document.getElementById('questions-container');
+  container.insertAdjacentHTML('beforeend', newHtml);
+  
+  // Находим добавленный элемент и устанавливаем data-атрибут
+  const newQuestion = container.lastElementChild;
+  newQuestion.setAttribute('data-question-index', questionCounter);
+  
+  answerCounters[questionCounter] = 0;
+  addDefaultAnswers(questionCounter);
+}
+
+  
+  function addDefaultAnswers(questionIndex) {
+    addAnswerToQuestion(questionIndex);
+  }
+
+  function removeQuestion(button) {
+    const questionItem = button.closest('.question-item');
+    if (questionItem) {
+      const questionIndex = getQuestionIndex(questionItem);
+      if (questionIndex !== null) {
+        delete answerCounters[questionIndex];
+      }
+      questionItem.remove();
+    }
+  }
+
+  function addAnswer(button) {
+  const questionItem = button.closest('.question-item');
+  if (!questionItem) return;
+  
+  const questionIndex = getQuestionIndex(questionItem);
+  if (questionIndex === null) return;
+  
+  addAnswerToQuestion(questionIndex);
+}
+
+  function addAnswerToQuestion(questionIndex) {
+  const answerIndex = answerCounters[questionIndex] || 0;
+  const answerTemplate = document.getElementById('answer-template').innerHTML;
+  
+  let newAnswerHtml = answerTemplate
+    .replace(/QUESTION_INDEX/g, questionIndex)
+    .replace(/ANSWER_INDEX/g, answerIndex);
+
+  // Находим контейнер для ответов
+  const questions = document.querySelectorAll('.question-item');
+  let targetContainer = null;
+  
+  // Ищем вопрос по индексу через name атрибут textarea
+  questions.forEach((question) => {
+    const textarea = question.querySelector(`textarea[name="quiz[questions_attributes][${questionIndex}][text]"]`);
+    if (textarea) {
+      targetContainer = question.querySelector('.answers-container');
+    }
+  });
+  
+  if (targetContainer) {
+    targetContainer.insertAdjacentHTML('beforeend', newAnswerHtml);
+    answerCounters[questionIndex] = (answerCounters[questionIndex] || 0) + 1;
+  }
+}
+
+// Также добавьте начальную инициализацию в DOMContentLoaded:
+document.addEventListener('DOMContentLoaded', function() {
+  // Инициализируем счетчики для существующих вопросов
+  const questions = document.querySelectorAll('.question-item');
+  
+  questions.forEach((question, questionIndex) => {
+    // Получаем индекс из существующего вопроса
+    const textarea = question.querySelector('textarea[name*="questions_attributes"]');
+    if (textarea) {
+      const match = textarea.name.match(/questions_attributes\[(\d+)\]/);
+      if (match) {
+        const index = parseInt(match[1]);
+        const answers = question.querySelectorAll('.answer-item').length;
+        answerCounters[index] = answers;
+        // Устанавливаем data-атрибут для удобства
+        question.setAttribute('data-question-index', index);
+      }
+    }
+  });
+  
+  // Обновляем questionCounter
+  const maxIndex = Math.max(...Object.keys(answerCounters).map(k => parseInt(k)), -1);
+  questionCounter = maxIndex + 1;
+});
+  
+  function removeAnswer(button) {
+    const answerItem = button.closest('.answer-item');
+    if (answerItem) {
+      answerItem.remove();
+    }
+  }
+  
+  function getQuestionIndex(questionElement) {
+  // Сначала проверяем data-атрибут
+  if (questionElement.hasAttribute('data-question-index')) {
+    return parseInt(questionElement.getAttribute('data-question-index'));
+  }
+  
+  // Если data-атрибута нет, ищем в textarea
+  const textarea = questionElement.querySelector('textarea[name*="questions_attributes"]');
+  if (textarea) {
+    const match = textarea.name.match(/questions_attributes\[(\d+)\]/);
+    return match ? parseInt(match[1]) : null;
+  }
+  return null;
+}
+</script>

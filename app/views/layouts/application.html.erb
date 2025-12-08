@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="h-full">
   <head>
     <title><%= content_for(:title) || "Quiizz" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -14,31 +14,49 @@
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+     <style>
+    /* Гарантируем, что body занимает всю высоту */
+    html, body {
+      height: 100%;
+    }
+  </style>
+
   </head>
 
-  <body class="font-sans bg-gray-50 min-h-screen">
-    <nav class="bg-emerald-800 shadow-lg">
+  <body class="font-sans bg-gray-50 h-full flex flex-col">
+    <nav class="shrink-0 bg-emerald-800 shadow-lg">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex justify-between h-16">
           <div class="shrink-0 flex items-center">
             <a href="<%= root_path %>"
               class="text-4xl font-bold text-white">Quiizz</a>
           </div>
+          
         </div>
       </div>
     </nav>
-  </body>
-
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
+    <%if flash.any? %>
+            <div class="max-w-7xl mx-auto px-4">
+              <% flash.each do |key, message| %>
+                <div class="mb-4 p-4 rounded-lg
+                  <%=
+                    case key
+                    when "notice" then "bg-green-100 text-green-800"
+                    when "alert" then "bg-red-100 text-red-800"
+                    else "bg-gray-100 text-gray-800"
+                    end
+                  %>">
+                  <%= message %>
+              <% end %>
+            <div>
+          <% end %>
+   <main class="flex-grow flex items-center justify-center">
+      <div class="container mx-auto px-5 text-center">
+        <%= yield %>
+      </div>
     </main>
   </body>
 </html>

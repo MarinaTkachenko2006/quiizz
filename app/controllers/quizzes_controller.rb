@@ -13,6 +13,7 @@ class QuizzesController < ApplicationController
 
   def new
     @quiz = Quiz.new
+    @quiz.author_id = 0
     @quiz.questions.build(
       order_index: 1,
       reward: 10,
@@ -29,6 +30,7 @@ class QuizzesController < ApplicationController
     if @quiz.save
       redirect_to @quiz, notice: 'Quiz created'
     else
+      flash.now[:alert] = 'Could not create the quiz'
       render :new, status: :unprocessable_entity
     end
   end
