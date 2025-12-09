@@ -1,46 +1,50 @@
 <div style="background: #FFFFFF; overflow: hidden;">
-  <h1 style="margin-bottom: 1.5rem;">Мои квизы</h1>
+  <h1 style="margin-bottom: 1.5rem; color: #333;">Мои квизы</h1>
   
   <% if @quizzes.any? %>
-    <ul style="list-style: none;">
+    <ul style="list-style: none; padding: 0; margin: 0;">
       <% @quizzes.each do |quiz| %>
-        <li style="border-bottom: 1px solid #E0E0E0;">
-          <button 
-            type="button" 
-            onclick="openQuizModal(<%= quiz.id %>, '<%= j(quiz.title) %>', '<%= j(quiz.description || 'Нет описания') %>', <%= quiz.is_public %>)"
-            style="width: 100%; text-align: left; padding: 1rem 1.5rem; background: none; border: none; cursor: pointer;"
-          >
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h3 style="font-size: 1.1rem; font-weight: 600; color: #333;">
-                  <%= quiz.title %>
-                  <% unless quiz.is_public %>
-                    <span style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">
-                      Приватный
-                    </span>
-                  <% end %>
-                </h3>
-                <div style="display: flex; gap: 0.5rem; color: #777777; font-size: 0.9rem; margin-top: 0.25rem;">
-                  <span><%= quiz.created_at.strftime("%d.%m.%Y") %> & <%= quiz.questions.count %> вопросов</span>
-                </div>
-              </div>
-              <div>
-                <% if quiz.author_id == current_user.id %>
-                  <%= button_to "Удалить", quiz_path(quiz), 
-                      method: :delete, 
-                      style: "color: #dc3545; background: none; border: 1px solid #dc3545; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;",
-                      onclick: "return confirm('Удалить этот квиз?')" %>
-                <% end %>
-              </div>
+        <li style="border-bottom: 1px solid #f0f0f0; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; background: #fafafa;">
+          <div>
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: #333; margin: 0 0 0.25rem 0; display: flex; align-items: center; gap: 0.5rem;">
+              <%= quiz.title %>
+              
+              <% if quiz.is_public %>
+                <!-- ПУБЛИЧНЫЙ -->
+                <span style="font-size: 0.75rem; background: #ffebee; color: #d32f2f; padding: 2px 8px; border-radius: 12px; border: 1px solid #ffcdd2;">
+                  Публичный
+                </span>
+              <% else %>
+                <!-- ПРИВАТНЫЙ -->
+                <span style="font-size: 0.75rem; background: #f3e5f5; color: #7b1fa2; padding: 2px 8px; border-radius: 12px; border: 1px solid #e1bee7;">
+                  Приватный
+                </span>
+              <% end %>
+            </h3>
+            <div style="display: flex; gap: 0.5rem; color: #777777; font-size: 0.9rem;">
+              <span><%= quiz.created_at.strftime("%d.%m.%Y") %> & <%= quiz.questions.count %> вопросов</span>
             </div>
-          </button>
+          </div>
+          
+          <div style="display: flex; gap: 0.5rem;">            
+            <% if quiz.author_id == current_user.id %>
+              <%= button_to "Удалить", quiz_path(quiz), 
+                  method: :delete, 
+                  form: { style: "display: inline; margin: 0;" },
+                  style: "color: #d32f2f; background: #ffebee; border: 1px solid #ffcdd2; padding: 0.35rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;",
+                  onclick: "return confirm('Удалить этот квиз?')" %>
+            <% end %>
+          </div>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <p style="color: #666; text-align: center; padding: 2rem;">
-      У вас еще нет квизов. 
-      <%= link_to "Создайте первый!", new_quiz_path %>
-    </p>
+    <div style="text-align: center; padding: 3rem; color: #666;">
+      <p style="margin-bottom: 1.5rem; font-size: 1.1rem; color: #7b1fa2;">
+        У вас еще нет квизов
+      </p>
+      <%= link_to "Создать первый квиз", new_quiz_path, 
+          style: "color: #ffffff; background: #7b1fa2; padding: 0.75rem 1.5rem; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-block;" %>
+    </div>
   <% end %>
 </div>
