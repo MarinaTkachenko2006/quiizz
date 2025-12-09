@@ -47,7 +47,7 @@ class QuizzesController < ApplicationController
   end
 
   def is_author
-    unless session[:user_id]=:author_id
+    unless session[:user_id] && @quiz && session[:user_id] == @quiz.author_id
       redirect_to root_path, alert: 'Only author can modify quiz'
       return false
     end

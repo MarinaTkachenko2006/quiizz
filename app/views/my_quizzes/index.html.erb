@@ -1,0 +1,46 @@
+<div style="background: #FFFFFF; overflow: hidden;">
+  <h1 style="margin-bottom: 1.5rem;">Мои квизы</h1>
+  
+  <% if @quizzes.any? %>
+    <ul style="list-style: none;">
+      <% @quizzes.each do |quiz| %>
+        <li style="border-bottom: 1px solid #E0E0E0;">
+          <button 
+            type="button" 
+            onclick="openQuizModal(<%= quiz.id %>, '<%= j(quiz.title) %>', '<%= j(quiz.description || 'Нет описания') %>', <%= quiz.is_public %>)"
+            style="width: 100%; text-align: left; padding: 1rem 1.5rem; background: none; border: none; cursor: pointer;"
+          >
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="font-size: 1.1rem; font-weight: 600; color: #333;">
+                  <%= quiz.title %>
+                  <% unless quiz.is_public %>
+                    <span style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">
+                      Приватный
+                    </span>
+                  <% end %>
+                </h3>
+                <div style="display: flex; gap: 0.5rem; color: #777777; font-size: 0.9rem; margin-top: 0.25rem;">
+                  <span><%= quiz.created_at.strftime("%d.%m.%Y") %> & <%= quiz.questions.count %> вопросов</span>
+                </div>
+              </div>
+              <div>
+                <% if quiz.author_id == current_user.id %>
+                  <%= button_to "Удалить", quiz_path(quiz), 
+                      method: :delete, 
+                      style: "color: #dc3545; background: none; border: 1px solid #dc3545; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;",
+                      onclick: "return confirm('Удалить этот квиз?')" %>
+                <% end %>
+              </div>
+            </div>
+          </button>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p style="color: #666; text-align: center; padding: 2rem;">
+      У вас еще нет квизов. 
+      <%= link_to "Создайте первый!", new_quiz_path %>
+    </p>
+  <% end %>
+</div>

@@ -12,7 +12,7 @@ class User < ApplicationRecord
   
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, if: :email_changed?
 
-  has_many :quizzes, foreign_key: 'author_id', dependent: :nullify
+  has_many :quizzes, foreign_key: 'author_id', dependent: :destroy
   has_many :scores, dependent: :destroy
 
   before_save :downcase_email

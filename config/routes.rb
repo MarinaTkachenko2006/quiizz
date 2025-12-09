@@ -15,6 +15,8 @@ Rails.application.routes.draw do
   resources :quizzes, only: [:new, :create, :index, :show, :destroy]
   resources :users, only: [:new, :create]
 
+  get 'my_quizzes', to: 'my_quizzes#index'
+
   get "profile", to: "users#show", as: :profile
   get "profile/edit", to: "users#edit", as: :edit_profile
   patch "profile", to: "users#update"
