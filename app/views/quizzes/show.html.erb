@@ -46,14 +46,8 @@
               </div>
               
               <div class="flex items-center text-gray-500 text-sm mt-2">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
                 <span class="mr-4"><%= question.time_limit %> seconds</span>
                 
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
                 <span><%= question.reward %> points</span>
               </div>
             </div>
@@ -74,9 +68,6 @@
                         <span class="text-lg text-gray-800"><%= answer.answer_text %></span>
                         
                         <div class="ml-auto hidden">
-                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
                         </div>
                     </div>
                     </button>
@@ -91,37 +82,26 @@
       <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
         <div class="mb-8">
           <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 rounded-full mb-6">
-            <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
           </div>
-          <h2 class="text-3xl font-bold text-gray-900 mb-4">Quiz Completed!</h2>
-          <p class="text-gray-600 text-lg">You've finished <strong><%= @quiz.title %></strong></p>
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Квиз завершён!</h2>
+        </div>
+
+        <div class="bg-purple-50 p-6 rounded-xl">
+          <div class="text-4xl font-bold text-purple-600" id="final-questions"><%= @questions.count %></div>
+          <div class="text-purple-500 mt-2">Общее количество вопросов: </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <div class="bg-blue-50 p-6 rounded-xl">
             <div class="text-4xl font-bold text-blue-600" id="final-correct">0</div>
-            <div class="text-blue-500 mt-2">Correct Answers</div>
+            <div class="text-blue-500 mt-2">Верных ответов: </div>
           </div>
           
           <div class="bg-emerald-50 p-6 rounded-xl">
             <div class="text-4xl font-bold text-emerald-600" id="final-score">0</div>
-            <div class="text-emerald-500 mt-2">Total Points</div>
+            <div class="text-emerald-500 mt-2">Сумма очков: </div>
           </div>
-          
-          <div class="bg-purple-50 p-6 rounded-xl">
-            <div class="text-4xl font-bold text-purple-600" id="final-questions"><%= @questions.count %></div>
-            <div class="text-purple-500 mt-2">Total Questions</div>
-          </div>
-        </div>
-
-        <div class="flex justify-center space-x-4">
-          <%= link_to "Back to Quizzes", quizzes_path, 
-              class: "px-6 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors duration-200" %>
-          
-          <%= link_to "Take Another Quiz", quizzes_path, 
-              class: "px-6 py-3 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors duration-200" %>
+        
         </div>
       </div>
     </div>

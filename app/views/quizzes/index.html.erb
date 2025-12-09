@@ -1,66 +1,53 @@
-<div class="bg-white rounded-xl shadow-md overflow-hidden">
-      <% if @quizzes.any? %>
-        <ul class="divide-y divide-gray-200">
-          <% @quizzes.each do |quiz| %>
-            <li class="hover:bg-gray-50 transition-colors duration-150">
-              <button 
-                type="button" 
-                onclick="openQuizModal(<%= quiz.id %>, '<%= j(quiz.title) %>', '<%= j(quiz.description || 'No description') %>')"
-                class="w-full text-left px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-gray-50"
-              >
-                <div class="flex justify-between items-center">
-                  <div>
-                    <h3 class="text-lg font-medium text-gray-900"><%= quiz.title %></h3>
-                    <div class="flex items-center mt-1 text-sm text-gray-500">
-                      <span><%= quiz.created_at.strftime("%b %d, %Y") %></span>
-                      <span class="mx-2">•</span>
-                      <span><%= quiz.questions.count %> questions</span>
-                    </div>
-                  </div>
+<div style="background: #FFFFFF; overflow: hidden;">
+  <% if @quizzes.any? %>
+    <ul style="list-style: none;">
+      <% @quizzes.each do |quiz| %>
+        <li style="border-bottom: 1px solid #E0E0E0;">
+          <button 
+            type="button" 
+            onclick="openQuizModal(<%= quiz.id %>, '<%= j(quiz.title) %>', '<%= j(quiz.description || 'Нет описания') %>')"
+            style="width: 100%; text-align: left; padding: 1rem 1.5rem; background: none; border: none; cursor: pointer;"
+          >
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="font-size: 1.1rem; font-weight: 600; color: #333;"><%= quiz.title %></h3>
+                <div style="display: flex; gap: 0.5rem; color: #777777; font-size: 0.9rem; margin-top: 0.25rem;">
+                  <span><%= quiz.created_at.strftime("%d.%m.%Y") %> & <%= quiz.questions.count %> вопросов</span>
                 </div>
-              </button>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <div class="text-center py-12">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
-          <h3 class="mt-2 text-sm font-medium text-gray-900">No quizzes yet</h3>
-          <p class="mt-1 text-sm text-gray-500">Be the first to create a public quiz!</p>
-        </div>
+              </div>
+            </div>
+          </button>
+        </li>
       <% end %>
+    </ul>
+  <% end %>
 </div>
 
+<div id="quizModal" style="position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 1rem;">
+  <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.3);" onclick="closeQuizModal()"></div>
 
-<div id="quizModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-  <div class="absolute inset-0 bg-gray-500/30" onclick="closeQuizModal()"></div>
+  <div style="position: relative; background: white; width: 100%; max-width: 28rem;">
 
-  <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md">
-
-    <div class="px-6 pt-6">
-      <h3 id="modalTitle" class="text-xl font-bold text-gray-900 mb-2"></h3>
+    <div style="padding: 1.5rem 1.5rem 0;">
+      <h3 id="modalTitle" style="font-size: 1.25rem; font-weight: 600; color: #333333; margin-bottom: 0.5rem;"></h3>
     </div>
 
-    <div class="px-6 py-4">
-      <div class="bg-gray-50 p-4 rounded-lg">
-        <p id="modalDescription" class="text-gray-700"></p>
+    <div style="padding: 1.5rem;">
+      <div style="background: #F0F0F0; padding: 1rem; ">
+        <p id="modalDescription" style="color: #666666; line-height: 1.6;"></p>
       </div>
     </div>
     
-    <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end space-x-3">
+    <div style="padding: 1rem 1.5rem; background: #F0F0F0; display: flex; justify-content: flex-end; gap: 0.75rem;">
       <button 
         onclick="closeQuizModal()"
-        class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition-colors"
+        style="padding: 0.5rem 1rem; color: #555555; background: #e9ecef; border: none; cursor: pointer; font-size: 1rem;"
       >
-        Close
+        Закрыть
       </button>
       <button 
-        onclick="joinQuiz()"
-        class="px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-md transition-colors"
-      >
-        Join Quiz
+        onclick="joinQuiz()"      >
+        Начать квиз
       </button>
     </div>
   </div>
@@ -75,12 +62,12 @@
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalDescription').textContent = description || 'Нет описания';
     
-    document.getElementById('quizModal').classList.remove('hidden');
+    document.getElementById('quizModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
   }
 
   function closeQuizModal() {
-    document.getElementById('quizModal').classList.add('hidden');
+    document.getElementById('quizModal').style.display = 'none';
     document.body.style.overflow = 'auto';
     currentQuizId = null;
   }
@@ -90,9 +77,4 @@
        window.location.href = `/quizzes/${currentQuizId}`;
     }
   }
-
-  // Закрытие по ESC
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeQuizModal();
-  });
 </script>
