@@ -1,7 +1,7 @@
 <div id="quiz-container" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
   <div class="max-w-4xl mx-auto">
     
-    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+    <div id="quiz-header" class="bg-white rounded-2xl shadow-lg p-6 mb-8">
       <div class="flex justify-between items-start">
         <div>
           <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @quiz.title %></h1>
@@ -10,9 +10,9 @@
           <% end %>
         </div>
         
-        <div id="timer-container" class="hidden">
+        <div id="timer-container" class="<%= is_author ? '' : 'hidden' %>">
           <div class="text-center">
-            <div class="text-sm text-gray-500 mb-1">Time remaining</div>
+            <div class="text-sm text-gray-500 mb-1">Осталось времени</div>
             <div id="timer" class="text-2xl font-bold text-emerald-600">00:30</div>
           </div>
         </div>
@@ -20,62 +20,145 @@
       
       <div class="mt-6">
         <div class="flex justify-between text-sm text-gray-600 mb-2">
-          <span>Question <span id="current-question">1</span> of <%= @questions.count %></span>
-          <span id="score">0</span> points</span>
+          <span>Вопрос <span id="current-question">1</span> из <%= @questions.count %></span>
+          <% if !is_author %>
+            <span><span id="score">0</span> очков</span>
+          <% end %>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2.5">
           <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
       </div>
     </div>
-
-    <div id="questions-container">
-      <% @questions.each_with_index do |question, index| %>
-        <div id="question-<%= question.id %>" class="question-card <%= index == 0 ? '' : 'hidden' %>" 
-             data-question-id="<%= question.id %>" 
-             data-time-limit="<%= question.time_limit %>"
-             data-correct-answers="<%= question.correct_answer_count %>">
-          
-          <div class="bg-white rounded-2xl shadow-lg p-8">
-            <div class="mb-8">
-              <div class="flex items-center mb-4">
-                <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-800 rounded-full text-lg font-bold mr-4">
-                  <%= index + 1 %>
-                </span>
-                <h2 class="text-2xl font-bold text-gray-900"><%= question.text %></h2>
-              </div>
-              
-              <div class="flex items-center text-gray-500 text-sm mt-2">
-                <span class="mr-4"><%= question.time_limit %> seconds</span>
-                <span><%= question.reward %> points</span>
-              </div>
+    
+    <% if is_author %>
+      <div id="quiz-management-container" class="mb-6">
+        <div class="author-controls p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-700">Управление квизом</h3>
+            <div class="flex space-x-3">
+              <button type="button" 
+                      id="pause-quiz-btn" 
+                      onclick="togglePause()"
+                      class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+                <span id="pause-text">Пауза</span>
+              </button>
+                      
+              <button type="button" 
+                      id="next-question-btn" 
+                      onclick="authorNextQuestion()"
+                      class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition">
+                Следующий вопрос
+              </button>
             </div>
-
-            <div id="answers-<%= question.id %>" class="space-y-4">
-                <% question.answers.shuffle.each.with_index do |answer, index| %>
-                    <button type="button" 
-                            class="answer-btn w-full text-left p-4 bg-gray-50 hover:bg-gray-100 border-2 border-transparent hover:border-gray-300 rounded-xl transition-all duration-200"
-                            data-answer-id="<%= answer.id %>"
-                            data-is-correct="<%= answer.is_correct %>"
-                            onclick="selectAnswer(this, <%= answer.id %>, <%= answer.is_correct %>, <%= question.id %>)">
-                    <div class="flex items-center">
-                        <div class="answer-circle flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 mr-4 transition-all duration-200">
-                        <span class="text-gray-600 font-medium">
-                            <%= ('A'..'Z').to_a[index] %>
-                        </span>
-                        </div>
-                        <span class="text-lg text-gray-800"><%= answer.answer_text %></span>
-                        
-                        <div class="ml-auto hidden">
-                        </div>
-                    </div>
-                    </button>
-                <% end %>
+          </div>
+                  
+          <div class="text-sm text-gray-600 space-y-1">
+            <div id="pause-status" class="hidden">
+              <span class="inline-flex items-center">
+                Квиз на паузе
+              </span>
+            </div>
+            <div>
+              Текущий вопрос: <span id="author-current-question">1</span> из <%= @questions.count %>
             </div>
           </div>
         </div>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
+
+    <% if is_author %>
+      <div id="questions-container">
+        <% @questions.each_with_index do |question, index| %>
+          <div id="question-<%= question.id %>" class="question-card <%= index == 0 ? '' : 'hidden' %>" 
+               data-question-id="<%= question.id %>" 
+               data-time-limit="<%= question.time_limit %>"
+               data-correct-answers="<%= question.correct_answer_count %>">
+            
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+              <div class="mb-8">
+                <div class="flex items-center mb-4">
+                  <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-800 rounded-full text-lg font-bold mr-4">
+                    <%= index + 1 %>
+                  </span>
+                  <h2 class="text-2xl font-bold text-gray-900"><%= question.text %></h2>
+                </div>
+                
+                <div class="flex items-center text-gray-500 text-sm mt-2">
+                  <span class="mr-4">Лимит времени: <%= question.time_limit %> секунд</span>
+                  <span>Баллы: <%= question.reward %></span>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div class="text-sm font-medium text-gray-700 mb-2">Варианты ответов:</div>
+                <% question.answers.each.with_index do |answer, index| %>
+                  <div class="w-full text-left p-4 <%= answer.is_correct ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200' %> rounded-xl">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full <%= answer.is_correct ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' %> mr-4">
+                        <span class="font-medium">
+                          <%= ('А'..'Я').to_a[index] %>
+                        </span>
+                      </div>
+                      <span class="text-lg text-gray-800"><%= answer.answer_text %></span>
+                      <% if answer.is_correct %>
+                        <span class="ml-auto text-green-600 font-medium">✓ Правильный</span>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div id="questions-container">
+        <% @questions.each_with_index do |question, index| %>
+          <div id="question-<%= question.id %>" class="question-card <%= index == 0 ? '' : 'hidden' %>" 
+               data-question-id="<%= question.id %>" 
+               data-time-limit="<%= question.time_limit %>"
+               data-correct-answers="<%= question.correct_answer_count %>"
+               data-reward="<%= question.reward %>">
+            
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+              <div class="mb-8">
+                <div class="flex items-center mb-4">
+                  <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-800 rounded-full text-lg font-bold mr-4">
+                    <%= index + 1 %>
+                  </span>
+                  <h2 class="text-2xl font-bold text-gray-900"><%= question.text %></h2>
+                </div>
+                
+                <div class="flex items-center text-gray-500 text-sm mt-2">
+                  <span class="mr-4"><%= question.time_limit %> секунд</span>
+                  <span><%= question.reward %> очков</span>
+                </div>
+              </div>
+
+              <div id="answers-<%= question.id %>" class="space-y-4">
+                <% question.answers.shuffle.each.with_index do |answer, index| %>
+                  <button type="button" 
+                          class="answer-btn w-full text-left p-4 bg-gray-50 hover:bg-gray-100 border-2 border-transparent hover:border-gray-300 rounded-xl transition-all duration-200"
+                          data-answer-id="<%= answer.id %>"
+                          data-is-correct="<%= answer.is_correct %>"
+                          onclick="selectAnswer(this, <%= answer.id %>, <%= answer.is_correct %>, <%= question.id %>)">
+                    <div class="flex items-center">
+                      <div class="answer-circle flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 mr-4 transition-all duration-200">
+                        <span class="text-gray-600 font-medium">
+                          <%= ('А'..'Я').to_a[index] %>
+                        </span>
+                      </div>
+                      <span class="text-lg text-gray-800"><%= answer.answer_text %></span>
+                    </div>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
 
     <div id="results-container" class="hidden">
       <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
@@ -85,23 +168,26 @@
           <h2 class="text-3xl font-bold text-gray-900 mb-4">Квиз завершён!</h2>
         </div>
 
-        <div class="bg-purple-50 p-6 rounded-xl">
-          <div class="text-4xl font-bold text-purple-600" id="final-questions"><%= @questions.count %></div>
-          <div class="text-purple-500 mt-2">Общее количество вопросов: </div>
-        </div>
+        <% if is_author %>
+          <p class="text-gray-600 mb-6">Все участники завершили прохождение квиза.</p>
+        <% else %>
+          <div class="bg-purple-50 p-6 rounded-xl">
+            <div class="text-4xl font-bold text-purple-600" id="final-questions"><%= @questions.count %></div>
+            <div class="text-purple-500 mt-2">Общее количество вопросов: </div>
+          </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div class="bg-blue-50 p-6 rounded-xl">
-            <div class="text-4xl font-bold text-blue-600" id="final-correct">0</div>
-            <div class="text-blue-500 mt-2">Верных ответов: </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 mt-6">
+            <div class="bg-blue-50 p-6 rounded-xl">
+              <div class="text-4xl font-bold text-blue-600" id="final-correct">0</div>
+              <div class="text-blue-500 mt-2">Верных ответов: </div>
+            </div>
+            
+            <div class="bg-emerald-50 p-6 rounded-xl">
+              <div class="text-4xl font-bold text-emerald-600" id="final-score">0</div>
+              <div class="text-emerald-500 mt-2">Сумма очков: </div>
+            </div>
           </div>
-          
-          <div class="bg-emerald-50 p-6 rounded-xl">
-            <div class="text-4xl font-bold text-emerald-600" id="final-score">0</div>
-            <div class="text-emerald-500 mt-2">Сумма очков: </div>
-          </div>
-        
-        </div>
+        <% end %>
       </div>
     </div>
   </div>
@@ -114,9 +200,65 @@
   let correctAnswersCount = 0;
   let timer = null;
   let selectedAnswers = [];
-  
+  let isPaused = false;
+  let pauseTimer = null;
+
+  function togglePause() {
+    const pauseBtn = document.getElementById('pause-quiz-btn');
+    const pauseText = document.getElementById('pause-text');
+    const pauseStatus = document.getElementById('pause-status');
+    
+    isPaused = !isPaused;
+    
+    if (isPaused) {
+      clearInterval(timer);
+      pauseText.textContent = 'Продолжить';
+      pauseStatus.classList.remove('hidden');
+      pauseBtn.classList.remove('bg-blue-500');
+      pauseBtn.classList.add('bg-yellow-500');
+      
+      const timerElement = document.getElementById('timer');
+      const timeStr = timerElement.textContent;
+      const [minutes, seconds] = timeStr.split(':').map(Number);
+      pauseTimer = minutes * 60 + seconds;
+      
+    } else {
+      pauseText.textContent = 'Пауза';
+      pauseStatus.classList.add('hidden');
+      pauseBtn.classList.remove('bg-yellow-500');
+      pauseBtn.classList.add('bg-blue-500');
+      
+      if (pauseTimer > 0) {
+        startTimerWithTime(pauseTimer);
+      } else {
+        startTimer();
+      }
+    }
+  }
+
+  function startTimerWithTime(timeLeft) {
+    const currentQuestion = document.querySelector('.question-card:not(.hidden)');
+    if (!currentQuestion) return;
+    
+    updateTimerDisplay(timeLeft);
+    
+    if (timer) clearInterval(timer);
+    
+    timer = setInterval(() => {
+      timeLeft--;
+      updateTimerDisplay(timeLeft);
+      
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        const questionId = currentQuestion.dataset.questionId;
+        timeUp(questionId);
+      }
+    }, 1000);
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     startTimer();
+    updateAuthorCounter();
   });
   
   function startTimer() {
@@ -125,8 +267,6 @@
     
     const timeLimit = parseInt(currentQuestion.dataset.timeLimit);
     const questionId = currentQuestion.dataset.questionId;
-    
-    document.getElementById('timer-container').classList.remove('hidden');
     
     let timeLeft = timeLimit;
     updateTimerDisplay(timeLeft);
@@ -139,7 +279,12 @@
       
       if (timeLeft <= 0) {
         clearInterval(timer);
-        timeUp(questionId);
+        <% if !is_author %>
+          timeUp(questionId);
+        <% else %>
+          updateTimerDisplay(0);
+          timer = null;
+        <% end %>
       }
     }, 1000);
   }
@@ -153,6 +298,9 @@
     if (seconds <= 10) {
       timerElement.classList.remove('text-emerald-600');
       timerElement.classList.add('text-red-600');
+    } else {
+      timerElement.classList.remove('text-red-600');
+      timerElement.classList.add('text-emerald-600');
     }
   }
   
@@ -235,7 +383,9 @@
       score += questionReward;
       correctAnswersCount++;
       
-      document.getElementById('score').textContent = score;
+      <% if !is_author %>
+        document.getElementById('score').textContent = score;
+      <% end %>
     }
 
     setTimeout(() => {
@@ -243,33 +393,77 @@
     }, 2000);
   }
   
- function goToNextQuestion() {
-  const currentQuestion = document.querySelector('.question-card:not(.hidden)');
-  if (currentQuestion) {
-    currentQuestion.classList.add('hidden');
-  }
-  
-  currentQuestionNumber++;
-  
-  updateProgress();
-  
-  if (currentQuestionNumber > totalQuestions) {
-    document.getElementById('progress-bar').style.width = '100%';
-    document.getElementById('current-question').textContent = totalQuestions;
+  function authorNextQuestion() {
+    if (isPaused) {
+      togglePause(); 
+    }
     
-    showResults();
-    return;
-  }
-  
-  const nextQuestion = document.querySelector(`.question-card:nth-child(${currentQuestionNumber})`);
-  if (nextQuestion) {
-    nextQuestion.classList.remove('hidden');
-    selectedAnswers = [];
+    const currentQuestion = document.querySelector('.question-card:not(.hidden)');
+    const questionId = currentQuestion.dataset.questionId;
     
-    startTimer();
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    
+    <% if !is_author %>
+      const answerBtns = document.querySelectorAll(`#answers-${questionId} .answer-btn`);
+      answerBtns.forEach(btn => {
+        btn.disabled = true;
+        btn.classList.add('opacity-50');
+      });
+      
+      answerBtns.forEach(btn => {
+        if (btn.dataset.isCorrect === 'true') {
+          btn.classList.add('border-green-500', 'bg-green-50');
+        }
+      });
+    <% end %>
+    
+    setTimeout(() => {
+      goToNextQuestion();
+    }, 1000);
   }
-}
-  
+
+  function goToNextQuestion() {
+    const currentQuestion = document.querySelector('.question-card:not(.hidden)');
+    if (currentQuestion) {
+      currentQuestion.classList.add('hidden');
+    }
+    
+    currentQuestionNumber++;
+    
+    updateAuthorCounter();
+    updateProgress();
+    
+    if (currentQuestionNumber > totalQuestions) {
+      document.getElementById('progress-bar').style.width = '100%';
+      document.getElementById('current-question').textContent = totalQuestions;
+      
+      showResults();
+      return;
+    }
+    
+    const nextQuestion = document.querySelector(`.question-card:nth-child(${currentQuestionNumber})`);
+    if (nextQuestion) {
+      nextQuestion.classList.remove('hidden');
+      selectedAnswers = [];
+      
+      if (isPaused) {
+        togglePause();
+      }
+      
+      startTimer();
+    }
+  }
+
+  function updateAuthorCounter() {
+    const authorCounter = document.getElementById('author-current-question');
+    if (authorCounter) {
+      authorCounter.textContent = currentQuestionNumber;
+    }
+  }
+
   function updateProgress() {
     const progress = ((currentQuestionNumber - 1) / totalQuestions) * 100;
     document.getElementById('progress-bar').style.width = `${progress}%`;
@@ -277,15 +471,21 @@
   }
   
   function showResults() {
-
     document.getElementById('questions-container').classList.add('hidden');
-    document.getElementById('timer-container').classList.add('hidden');
-
+    document.getElementById('quiz-header').classList.add('hidden');
+    
+    const quizManagementContainer = document.getElementById('quiz-management-container');
+    if (quizManagementContainer) {
+      quizManagementContainer.classList.add('hidden');
+    }
+    
     document.getElementById('results-container').classList.remove('hidden');
     
-    document.getElementById('final-correct').textContent = correctAnswersCount;
-    document.getElementById('final-score').textContent = score;
-    document.getElementById('final-questions').textContent = totalQuestions;
+    <% if !is_author %>
+      document.getElementById('final-correct').textContent = correctAnswersCount;
+      document.getElementById('final-score').textContent = score;
+      document.getElementById('final-questions').textContent = totalQuestions;
+    <% end %>
   }
 </script>
 

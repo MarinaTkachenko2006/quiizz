@@ -1,7 +1,7 @@
 class QuizzesController < ApplicationController
   before_action :user_autorized
   before_action :set_quiz, only: [:show, :destroy]
-  before_action :is_author, only: [:destroy]
+  before_action :require_author, only: [:destroy]
 
   def index
     @quizzes = Quiz.where(is_public: true).order(created_at: :desc) || []
@@ -40,6 +40,7 @@ class QuizzesController < ApplicationController
     redirect_to quizzes_url, notice: 'Quiz deleted'
   end
 
+  helper_method :is_author
   private
 
   def set_quiz
@@ -47,6 +48,10 @@ class QuizzesController < ApplicationController
   end
 
   def is_author
+    session[:user_id] && @quiz && session[:user_id] == @quiz.author_id
+  end
+
+  def require_author
     unless session[:user_id] && @quiz && session[:user_id] == @quiz.author_id
       redirect_to root_path, alert: 'Only author can modify quiz'
       return false
