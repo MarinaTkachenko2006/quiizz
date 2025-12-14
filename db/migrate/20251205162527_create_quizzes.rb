@@ -4,9 +4,11 @@ class CreateQuizzes < ActiveRecord::Migration[8.1]
       t.string :title, null: false
       t.string :description
       t.integer :author_id, null: false
-      t.boolean :is_public, null: false
+      t.string :code, null: false
       t.timestamps
+
       t.index :title, unique: true
+      t.index :code, unique: true
     end
 
     create_table :questions do |t|

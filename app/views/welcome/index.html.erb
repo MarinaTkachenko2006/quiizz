@@ -1,17 +1,4 @@
 <div style="text-align: center; padding: 3rem 0;">
   <h1 style="font-size: 3rem;">Добро пожаловать в Quiizz</h1>
   <p style="font-size: 1.5rem;">Создавайте и проходите квизы</p>
-  
-  <% if logged_in? %>
-    <div class="user-info">
-      <div style="display: flex; gap: 1rem; justify-content: center;">
-        <%= link_to "Создать квиз", new_quiz_path, class: "btn btn-outline" %>  
-        <%= link_to "Перейти к квизам", quizzes_path, class: "btn" %>
-      </div>
-    </div>
-  <% else %>
-    <div>
-      <h2>Зарегистрируйтесь или войдите</h2>
-    </div>
-  <% end %>
 </div>

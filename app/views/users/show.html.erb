@@ -26,29 +26,29 @@
   <div style="max-width: 600px;">    
     <div>
       <label>Имя пользователя</label>
-      <div style="padding: 0.8rem; background: #DCDCDC;">
+      <div style="padding: 0.8rem; background: #DCDCDC; border-radius: 6px">
         <%= @user.nickname %>
       </div>
     </div>
     
     <div>
       <label>Почта</label>
-      <div style="padding: 0.8rem; background: #DCDCDC;">
+      <div style="padding: 0.8rem; background: #DCDCDC; border-radius: 6px">
         <%= @user.email %>
       </div>
     </div>
     
     <div>
       <label>Дата регистрации</label>
-      <div style="padding: 0.8rem; background: #DCDCDC;">
-        <%= @user.created_at.strftime("%d.%m.%Y; %H:%M") %>
+      <div style="padding: 0.8rem; background: #DCDCDC; border-radius: 6px">
+        <%= @user.created_at.strftime("%d.%m.%Y %H:%M") %>
       </div>
     </div>
     
     <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-      <%= link_to "Мои квизы", my_quizzes_path, class: "btn" %>
-      <%= link_to "Редактировать профиль", edit_profile_path, class: "btn" %>
-      <%= link_to "Сменить пароль", change_password_profile_path, class: "btn btn-outline" %>
+      <%= link_to "Мои квизы", my_quizzes_path, class: "btn-small" %>
+      <%= link_to "Редактировать профиль", edit_profile_path, class: "btn-small" %>
+      <%= link_to "Сменить пароль", change_password_profile_path, class: "btn-small btn-small-outline" %>
     </div>
   </div>
 </div>

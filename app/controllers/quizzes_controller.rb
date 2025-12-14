@@ -4,7 +4,17 @@ class QuizzesController < ApplicationController
   before_action :require_author, only: [:destroy]
 
   def index
-    @quizzes = Quiz.where(is_public: true).order(created_at: :desc) || []
+    if params[:code].present?
+      @quiz = Quiz.find_by(code: params[:code].upcase)
+      if @quiz
+        redirect_to quiz_path(@quiz)
+        return
+      else
+        flash[:alert] = 'Квиз с таким кодом не найден'
+      end
+    end
+    
+    @quizzes = Quiz.order(created_at: :desc) || []
   end
 
   def show
@@ -32,7 +42,15 @@ class QuizzesController < ApplicationController
   def create
     @quiz = Quiz.new(quiz_params)
     @quiz.author_id = session[:user_id]
+    loop do
+      new_code = SecureRandom.alphanumeric(8).upcase
+      unless Quiz.exists?(code: new_code)
+        @quiz.code = new_code
+        break
+      end
+    end
 
+    
     if @quiz.save
       redirect_to root_path, notice: 'Quiz is created'
     else
@@ -78,7 +96,6 @@ class QuizzesController < ApplicationController
     params.require(:quiz).permit(
       :title,
       :description,
-      :is_public,
       questions_attributes: [
         :id,
         :text,

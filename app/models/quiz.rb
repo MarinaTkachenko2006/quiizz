@@ -8,18 +8,28 @@ class Quiz < ApplicationRecord
   
   validates :title, presence: true, length: { maximum: 100 }
   validates :description, length: { maximum: 500 }
-  validates :is_public, inclusion: { in: [true, false] }
+  validates :code, presence: true, uniqueness: true, length: { is: 8 }
 
-  scope :public_quizzes, -> { where(is_public: true) }
+  before_validation :generate_code, on: :create
+  
   scope :by_user, ->(user) { where(author_id: user.id) }
 
   def question_count
     questions.count
   end
 
-    before_validation :set_questions_order
+  before_validation :set_questions_order
   
   private
+  
+  def generate_code
+    return if code.present?
+    
+    loop do
+      self.code = SecureRandom.alphanumeric(8).upcase
+      break unless Quiz.exists?(code: self.code)
+    end
+  end
   
   def set_questions_order
     questions.each_with_index do |question, index|

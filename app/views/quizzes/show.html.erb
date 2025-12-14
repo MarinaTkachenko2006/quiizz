@@ -1,14 +1,14 @@
 <div id="quiz-container" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
   <div class="max-w-4xl mx-auto">
     
-      <!--Сообщение о повторном прохождении-->
+    <!--Сообщение о повторном прохождении-->
     <% if @already_completed && !is_author %>
-      <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+      <div class="flash flash-notice" style="margin-bottom: 2rem;">
         <div class="flex items-center">
           <div class="ml-4">
-            <h3 class="text-lg font-medium text-yellow-800">Вы уже проходили этот квиз</h3>
-            <div class="mt-2 text-yellow-700">
-              <p>Ваш результат: <%= @score %> очков, <%= @correct_answers %> правильных ответов (<%= @accuracy %>% точности)</p>
+            <h3 style="font-size: 1.1rem; font-weight: 600; color: #2c5282; margin: 0 0 0.5rem 0;">Вы уже проходили этот квиз</h3>
+            <div style="margin-top: 0.5rem; color: #4a5568;">
+              <p style="margin: 0;">Ваш результат: <%= @score %> очков, <%= @correct_answers %> правильных ответов (<%= @accuracy %>% точности)</p>
             </div>
           </div>
         </div>
@@ -16,7 +16,7 @@
     <% end %>
     
     <div id="quiz-header" class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-      <div class="flex justify-between items-start">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start">
         <div>
           <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= @quiz.title %></h1>
           <% if @quiz.description.present? %>
@@ -25,31 +25,20 @@
         </div>
         
         <div id="quiz-code" class="bg-gray-100 px-4 py-2 rounded-lg">
-          <div class="text-sm text-gray-500">Код квиза: <%= @quiz.id %></div>
+          <div class="text-sm text-gray-500">Код квиза: <%= @quiz.code %></div>
         </div>
       </div>
-      
-      <div class="mt-6">
-        <div id="participants-container" class="hidden mb-4">
-          <div class="text-sm text-gray-600 mb-2">Участники:</div>
-          <div id="participants-list" class="flex flex-wrap gap-2"></div>
-        </div>
-        
-        <div class="w-full bg-gray-200 rounded-full h-2.5">
-          <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-        </div>
-      </div>
-    </div>
     
     <!--Экран ожидания-->
     <div id="waiting-screen" class="text-center py-16">
       <div class="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
         <div class="mb-8">
-          <h2 class="text-2xl font-bold text-gray-900 mb-4">Ожидание начала квиза</h2>
           <p class="text-gray-600 mb-6" id="waiting-message">
             <% if is_author %>Дождитесь подключения участников и запустите квиз<% end %>
           </p>
-          
+          <% if !is_author && !@already_completed %>
+            <div class="text-sm text-gray-500">Вы присоединились к квизу. Ожидайте начала.</div>
+          <% end %>
           <div id="participants-count" class="text-lg font-semibold text-purple-600 mb-2">Участников: <span id="participants-count-number">1</span></div>
         </div>
         
@@ -59,35 +48,34 @@
                   class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">Начать квиз</button>
         <% end %>
         
-        <% if !is_author && !@already_completed %>
-          <div class="text-sm text-gray-500">Вы присоединились к квизу. Ожидайте начала.</div>
-        <% end %>
       </div>
     </div>
     
-    <!-- Управление квизом-->
-    <div id="quiz-management-container" class="hidden mb-6">
-      <div class="author-controls p-4 bg-gray-50 rounded-xl border border-gray-200">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-gray-700">Управление квизом</h3>
-          <div class="flex space-x-3">
+     <!-- Управление квизом-->
+    <div id="quiz-management-container" class="hidden" style="margin-bottom: 1.5rem;">
+      <div style="padding: 1.5rem; background: #f8f8f8; border-radius: 8px; border: 1px solid #e5e7eb;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 600; color: #444;">Управление квизом</h3>
+          <div style="display: flex; gap: 0.75rem;">
             <button type="button" 
                     id="pause-quiz-btn" 
                     onclick="togglePause()"
-                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+                    style="padding: 0.5rem 1rem; background: #4299e1; color: white; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;">
               <span id="pause-text">Пауза</span>
             </button>
                     
             <button type="button" 
                     id="next-question-btn" 
                     onclick="nextQuestion()"
-                    class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition">Следующий вопрос</button>
+                    style="padding: 0.5rem 1rem; background: #38a169; color: white; border: none; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;">
+              Следующий вопрос
+            </button>
           </div>
         </div>
                 
-        <div class="text-sm text-gray-600 space-y-1">
-          <div id="pause-status" class="hidden">
-            <span class="inline-flex items-center">
+        <div style="font-size: 0.9rem; color: #666;">
+          <div id="pause-status" class="hidden" style="margin-bottom: 0.25rem;">
+            <span style="display: inline-flex; align-items: center;">
               Квиз на паузе
             </span>
           </div>
@@ -98,14 +86,9 @@
       </div>
     </div>
 
-    <!-- Контейнер для вопросов -->
     <div id="questions-container" class="hidden">
-      <!-- Вопросы будут загружаться динамически через WebSocket -->
     </div>
-
-    <!-- Контейнер для результатов -->
     <div id="results-container" class="hidden">
-      <!-- Результаты будут загружаться динамически -->
     </div>
   </div>
 </div>
@@ -332,62 +315,53 @@ function showQuizStarted() {
 function showQuestion(questionData, questionNumber, total) {
   const container = document.getElementById('questions-container');
   
+  const answersHtml = questionData.answers.map((answer, index) => `
+    <button type="button" 
+            onclick="selectAnswer(${answer.id}, ${questionData.id})"
+            class="answer-btn w-full text-left p-4 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:shadow-sm transition mb-3">
+      <div class="text-gray-800">${answer.answer_text}</div>
+    </button>`).join('');
+
   container.innerHTML = `
-    <div class="bg-white rounded-2xl shadow-lg p-8">
+    <div class="main-content">
       <div class="mb-6">
         <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center">
-            <span class="inline-flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-800 rounded-full text-lg font-bold mr-4">
-              ${questionNumber}
-            </span>
-            <h2 class="text-2xl font-bold text-gray-900">${questionData.text}</h2>
+          <div>
+            <div class="flex items-center mb-2">
+              <div class="text-sm text-gray-600">
+                Вопрос ${questionNumber} из ${total} & ${questionData.reward} баллов
+              </div>
+            </div>
+            <h2 class="text-xl font-bold text-gray-900">${questionData.text}</h2>
           </div>
           
-          <!-- ТАЙМЕР -->
-          <div class="flex items-center bg-gray-100 px-4 py-2 rounded-lg">
-            <span id="timer" class="text-xl font-bold text-gray-900">${formatTime(questionData.time_limit)}</span>
+          <div class="bg-gray-100 px-4 py-2 rounded">
+            <span id="timer" class="text-lg font-bold text-gray-900">${formatTime(questionData.time_limit)}</span>
           </div>
-        </div>
-        
-        <div class="flex items-center text-gray-500 text-sm">
-          <span>Всего времени: ${questionData.time_limit} сек.</span>
         </div>
       </div>
 
-      <div class="space-y-3">
-        ${questionData.answers.map((answer, index) => `
-          <button type="button" 
-                  onclick="selectAnswer(${answer.id}, ${questionData.id})"
-                  class="answer-btn w-full text-left p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition">
-            <div class="flex items-center">
-              <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 mr-4">
-                <span class="font-medium text-gray-600">
-                  ${String.fromCharCode(65 + index)}
-                </span>
-              </div>
-              <span class="text-lg text-gray-800">${answer.answer_text}</span>
-            </div>
-          </button>
-        `).join('')}
+      <div>
+        ${answersHtml}
       </div>
       
-      <div class="mt-6 text-center text-gray-500 text-sm">
-        ${<%= is_author %> ? 'Участники отвечают...' : 'Выберите ответ'}
+      <!-- Статус -->
+      <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+        <div class="text-sm text-gray-500">
+          ${<%= is_author %> ? 
+            'Участники отвечают' : 
+            'Выберите вариант ответа'
+          }
+        </div>
       </div>
-    </div>
-  `;
+    </div>`;
   
-  // Запускаем таймер (только для участников, автор не отвечает)
-  if (<%= !is_author %>) {
-    startTimer(questionData.time_limit);
-  }
+  startTimer(questionData.time_limit);
   
-  updateProgress(questionNumber, total);
-  
-  if (<%= is_author %>) {
+  if (<%= is_author %>)
     document.getElementById('author-current-question').textContent = questionNumber;
-  }
 }
+
 
 function showResults(statistics) {
   document.getElementById('questions-container').classList.add('hidden');
@@ -396,40 +370,59 @@ function showResults(statistics) {
   
   const container = document.getElementById('results-container');
   
+  const sortedStats = [...statistics].sort((a, b) => {
+    const aPercentage = (a.correct_answers / a.total_questions) * 100;
+    const bPercentage = (b.correct_answers / b.total_questions) * 100;
+    return bPercentage - aPercentage;
+  });
+  
+  const top5 = sortedStats.slice(0, 5);
+  
   let html = `
     <div class="bg-white rounded-2xl shadow-lg p-8">
-      <h2 class="text-2xl font-bold text-gray-900 mb-6">Квиз завершен!</h2>
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Квиз завершен!</h2>
       
-      <div class="space-y-4">
-  `;
+      <div class="text-center mb-8">
+        <div class="text-lg font-medium text-gray-700 mb-2">Топ-5 участников</div>
+      </div>
+      
+      <div class="space-y-4">`;
   
-  statistics.forEach((stat, index) => {
-    const isCurrentUser = stat.user_id == <%= current_user.id %>;
-    const percentage = Math.round((stat.correct_answers / stat.total_questions) * 100);
-    
+  if (top5.length === 0) {
     html += `
-      <div class="p-4 rounded-lg border ${isCurrentUser ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}">
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="font-semibold ${isCurrentUser ? 'text-blue-700' : 'text-gray-700'}">
-              ${stat.nickname} ${isCurrentUser ? '(Вы)' : ''}
+      <div class="text-center py-8 text-gray-500">
+        Нет данных о результатах
+      </div>`;
+  } else {
+    top5.forEach((stat, index) => {
+      const isCurrentUser = stat.user_id == <%= current_user.id %>;
+      const percentage = stat.total_questions > 0 ? 
+        Math.round((stat.correct_answers / stat.total_questions) * 100) : 0;
+      const position = index + 1;
+      
+      html += `
+        <div class="p-4 rounded-lg border ${isCurrentUser ? 'bg-purple-50 border-purple-200' : 'bg-gray-50 border-gray-200'}">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-semibold ${isCurrentUser ? 'text-purple-700' : 'text-gray-700'}">
+                ${position}. ${stat.nickname} ${isCurrentUser ? '(Вы)' : ''} - ${stat.correct_answers} из ${stat.total_questions} правильных (${percentage}%)
+              </div>
             </div>
-            <div class="text-sm text-gray-500">
-              ${stat.correct_answers} из ${stat.total_questions} правильных (${percentage}%)
-            </div>
-          </div>
-          <div class="text-xl font-bold text-emerald-600">
-            ${index + 1}
           </div>
         </div>
-      </div>
-    `;
-  });
+      `;
+    });
+  }
   
   html += `
       </div>
-    </div>
-  `;
+      
+      <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+        <div class="text-sm text-gray-500">
+          Всего участников: ${statistics.length}
+        </div>
+      </div>
+    </div>`;
   
   container.innerHTML = html;
 }
@@ -447,7 +440,6 @@ function updatePauseState(isPaused) {
     btn.classList.remove('bg-blue-500');
     btn.classList.add('bg-yellow-500');
     
-    // Для участников показываем сообщение о паузе
     if (<%= !is_author %>) {
       const questionsContainer = document.getElementById('questions-container');
       if (questionsContainer) {
@@ -455,7 +447,7 @@ function updatePauseState(isPaused) {
         pauseMessage.className = 'bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4 text-center';
         pauseMessage.innerHTML = `
           <div class="flex items-center justify-center">
-            <span class="text-yellow-800 font-medium">Квиз на паузе. Ожидайте продолжения...</span>
+            <span class="text-yellow-800 font-medium">Квиз на паузе. Ожидайте продолжения</span>
           </div>
         `;
         questionsContainer.prepend(pauseMessage);
@@ -467,27 +459,11 @@ function updatePauseState(isPaused) {
     btn.classList.remove('bg-yellow-500');
     btn.classList.add('bg-blue-500');
     
-    // Убираем сообщение о паузе у участников
     if (<%= !is_author %>) {
       const pauseMessage = document.querySelector('.bg-yellow-50.border-yellow-200');
-      if (pauseMessage) {
+      if (pauseMessage)
         pauseMessage.remove();
-      }
     }
-  }
-}
-
-function updateProgress(current, total) {
-  const progress = ((current - 1) / total) * 100;
-  const progressBar = document.getElementById('progress-bar');
-  const currentQuestionEl = document.getElementById('current-question');
-  
-  if (progressBar) {
-    progressBar.style.width = `${progress}%`;
-  }
-  
-  if (currentQuestionEl) {
-    currentQuestionEl.textContent = current;
   }
 }
 

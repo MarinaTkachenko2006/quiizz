@@ -43,11 +43,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_14_083834) do
 
   create_table "quizzes", force: :cascade do |t|
     t.integer "author_id", null: false
+    t.string "code", null: false
     t.datetime "created_at", null: false
     t.string "description"
-    t.boolean "is_public", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_quizzes_on_code", unique: true
     t.index ["title"], name: "index_quizzes_on_title", unique: true
   end
 

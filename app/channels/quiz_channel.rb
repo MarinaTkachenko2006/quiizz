@@ -33,11 +33,7 @@ class QuizChannel < ApplicationCable::Channel
     Rails.cache.write("quiz_#{@quiz.id}_status", 'started')
     Rails.cache.write("quiz_#{@quiz.id}_current_question", 0)
     Rails.cache.write("quiz_#{@quiz.id}_paused", false)
-    
-    # ===== ВСЕ ВОПРОСЫ ЗАГРУЖАЮТСЯ ОДИН РАЗ =====
-    puts "📥 Загружаем все вопросы для квиза #{@quiz.id}..."
-    
-    # Загружаем вопросы с ответами ОДИН РАЗ
+
     questions_data = @quiz.questions.includes(:answers).order(:order_index).map do |question|
       {
         id: question.id,
@@ -45,7 +41,6 @@ class QuizChannel < ApplicationCable::Channel
         reward: question.reward,
         time_limit: question.time_limit,
         order_index: question.order_index,
-        # Сохраняем информацию о правильности для сервера
         server_answers: question.answers.map { |answer| 
           { 
             id: answer.id, 
@@ -53,7 +48,6 @@ class QuizChannel < ApplicationCable::Channel
             is_correct: answer.is_correct
           } 
         },
-        # Для клиентов - только id и текст
         client_answers: question.answers.shuffle.map { |answer| 
           { 
             id: answer.id, 
@@ -63,13 +57,9 @@ class QuizChannel < ApplicationCable::Channel
       }
     end
     
-    puts "✅ Загружено #{questions_data.count} вопросов"
-    
-    # Сохраняем в кеше
     Rails.cache.write("quiz_#{@quiz.id}_questions", questions_data)
     Rails.cache.write("quiz_#{@quiz.id}_total_questions", questions_data.count)
     
-    # Подготовка данных для отправки клиентам
     questions_for_clients = questions_data.map do |question|
       {
         id: question[:id],
@@ -93,22 +83,17 @@ class QuizChannel < ApplicationCable::Channel
   def next_question(data)
     return unless @quiz.author_id == @user.id
     
-    # Получаем текущий вопрос из кеша
     current = Rails.cache.read("quiz_#{@quiz.id}_current_question").to_i
     next_q = current + 1
     
-    # Получаем все вопросы из кеша
     questions = Rails.cache.read("quiz_#{@quiz.id}_questions") || []
     total_questions = questions.count
     
-    if next_q <= total_questions  # ← НЕТ ЗАПРОСА К БД!
-      # Обновляем текущий вопрос в кеше
+    if next_q <= total_questions
       Rails.cache.write("quiz_#{@quiz.id}_current_question", next_q)
       
-      # Берем следующий вопрос из кешированных данных
-      question_data = questions[current]  # ← НЕТ ЗАПРОСА К БД!
-      
-      # Готовим данные для клиентов
+      question_data = questions[current]
+
       question_for_client = {
         id: question_data[:id],
         text: question_data[:text],
@@ -121,7 +106,7 @@ class QuizChannel < ApplicationCable::Channel
         action: 'next_question',
         question: question_for_client,
         question_number: next_q,
-        total_questions: total_questions  # ← НЕТ ЗАПРОСА К БД!
+        total_questions: total_questions
       })
     else
       end_quiz(data)
@@ -157,10 +142,8 @@ class QuizChannel < ApplicationCable::Channel
       correct_count = 0
       
       user_answers.each do |question_id, answer_data|
-        # Находим вопрос в кешированных данных
         question = questions.find { |q| q[:id] == question_id }
         if question
-          # Находим ответ в server_answers (там есть is_correct)
           answer = question[:server_answers].find { |a| a[:id] == answer_data[:answer_id] }
           if answer && answer[:is_correct]
             correct_count += 1
@@ -172,7 +155,7 @@ class QuizChannel < ApplicationCable::Channel
         user_id: p[:id],
         nickname: p[:nickname],
         correct_answers: correct_count,
-        total_questions: questions.count  # ← НЕТ ЗАПРОСА К БД!
+        total_questions: questions.count 
       }
     end
     
@@ -181,7 +164,6 @@ class QuizChannel < ApplicationCable::Channel
       statistics: statistics
     })
     
-    # Очищаем кеш (опционально)
     Rails.cache.delete("quiz_#{@quiz.id}_questions")
     Rails.cache.delete("quiz_#{@quiz.id}_answers")
     Rails.cache.delete("quiz_#{@quiz.id}_status")

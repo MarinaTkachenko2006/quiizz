@@ -1,36 +1,24 @@
-<div class="min-h-screen bg-gray-50 py-8 px-4">
-  <div class="max-w-4xl mx-auto">
-    <div class="text-center mb-8">
+<div class="min-h-screen py-8 px-4">
+  <div class="container mx-auto">
+    <div class="text-center mb-10">
       <h1 class="text-3xl font-bold text-gray-900">Создание квиза</h1>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="bg-white rounded-lg shadow p-8">
       <%= form_with(model: @quiz, id: "quiz-form") do |f| %>
         <%= render "quiz_fields", f: f %>
         
-        <div class="mb-8">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-semibold text-gray-800">Содержимое</h2>
-            <button type="button" 
-                    onclick="addQuestion()"
-                    class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              Добавить вопрос
-            </button>
-          </div>
-
-          <div id="questions-container" class="space-y-6">
-            <%= f.fields_for :questions do |question_fields| %>
-              <%= render "question_fields", f: question_fields %>
-            <% end %>
+        <div class="mb-10">
+          <div class="flex justify-center mb-8">
+            <button type="button" class="btn" onclick="addQuestion()">Добавить вопрос</button>
           </div>
         </div>
 
-        <div class="flex justify-between items-center pt-6 border-t border-gray-200">
-          <%= link_to "Cancel", root_path, 
-                      class: "px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50" %>
-          
-          <%= f.submit "Create quiz", 
-                       class: "px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
+        <div id="questions-container" class="space-y-8"></div>
+
+        <div class="mt-12 pt-8 border-t border-gray-300">
+          <%= f.submit "Создать квиз", 
+                class: "btn w-full" %>
         </div>
       <% end %>
     </div>
@@ -42,13 +30,11 @@
 
 <script>
 
-   if (typeof questionCounter === 'undefined') {
+   if (typeof questionCounter === 'undefined')
     questionCounter = <%= @quiz.questions.size || 0 %>;
-  }
   
-  if (typeof answerCounters === 'undefined') {
+  if (typeof answerCounters === 'undefined')
     answerCounters = {};
-  }
   
   document.addEventListener('DOMContentLoaded', function() {
     if (Object.keys(answerCounters).length === 0) {
@@ -58,32 +44,29 @@
         if (questionIndex !== null) {
           const answers = question.querySelectorAll('.answer-item').length;
           answerCounters[questionIndex] = answers;
-          if (questionIndex > questionCounter) {
+          if (questionIndex > questionCounter)
             questionCounter = questionIndex;
-          }
         }
       });
       
-      if (questions.length === 0) {
+      if (questions.length === 0)
         questionCounter = 0;
-      }
     }
   });
 
   function addQuestion() {
-    questionCounter++;
+    ++questionCounter;
     const questionTemplate = document.getElementById('question-template').innerHTML;
     
-    let newHtml = questionTemplate
-      .replace(/NEW_QUESTION_INDEX/g, questionCounter)
-      .replace(/NEW_ORDER_INDEX/g, questionCounter);
-    
+    let newHtml = questionTemplate.replace(/NEW_QUESTION_INDEX/g, questionCounter);
+
     document.getElementById('questions-container').insertAdjacentHTML('beforeend', newHtml);
     
-    const newQuestion = document.querySelector(`[name="quiz[questions_attributes][${questionCounter}][text]"]`)
-                      .closest('.question-item');
+    const newQuestion = document.querySelector(`[name="quiz[questions_attributes][${questionCounter}][text]"]`).closest('.question-item');
     if (newQuestion) {
       newQuestion.setAttribute('data-question-index', questionCounter);
+      const title = newQuestion.querySelector('h3');
+      if (title) title.textContent = `Вопрос ${questionCounter}`;
     }
     
     answerCounters[questionCounter] = 0;
@@ -91,18 +74,16 @@
   }
   
   function addDefaultAnswers(questionIndex) {
-    for (let i = 0; i < 1; i++) {
-      addAnswerToQuestion(questionIndex);
-    }
+    for (let i = 0; i < 2; ++i) addAnswerToQuestion(questionIndex);
   }
 
   function removeQuestion(button) {
     const questionItem = button.closest('.question-item');
     if (questionItem) {
       const questionIndex = getQuestionIndex(questionItem);
-      if (questionIndex !== null) {
+      if (questionIndex !== null)
         delete answerCounters[questionIndex];
-      }
+
       questionItem.remove();
     }
   }
@@ -132,9 +113,9 @@
         answerCounters[questionIndex] = answerIndex + 1;
       }
     } else {
-      const textarea = document.querySelector(`textarea[name="quiz[questions_attributes][${questionIndex}][text]"]`);
-      if (textarea) {
-        const container = textarea.closest('.question-item').querySelector('.answers-container');
+      const input = document.querySelector(`input[name="quiz[questions_attributes][${questionIndex}][text]"]`);
+      if (input) {
+        const container = input.closest('.question-item').querySelector('.answers-container');
         if (container) {
           container.insertAdjacentHTML('beforeend', newAnswerHtml);
           answerCounters[questionIndex] = answerIndex + 1;
@@ -161,13 +142,11 @@
   
   function getQuestionIndex(questionElement) {
     const dataIndex = questionElement.getAttribute('data-question-index');
-    if (dataIndex) {
-      return parseInt(dataIndex);
-    }
+    if (dataIndex) return parseInt(dataIndex);
     
-    const textarea = questionElement.querySelector('textarea[name*="questions_attributes"]');
-    if (textarea) {
-      const match = textarea.name.match(/questions_attributes\[(\d+)\]/);
+    const input = questionElement.querySelector('input[name*="questions_attributes"]');
+    if (input) {
+      const match = input.name.match(/questions_attributes\[(\d+)\]/);
       return match ? parseInt(match[1]) : null;
     }
     return null;
