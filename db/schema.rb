@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_07_151558) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_14_083834) do
   create_table "answers", force: :cascade do |t|
     t.string "answer_text", null: false
     t.datetime "created_at", null: false
@@ -27,6 +27,18 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_07_151558) do
     t.string "text", null: false
     t.integer "time_limit", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "quiz_sessions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "is_completed", default: false
+    t.integer "number_correct_answers", default: 0
+    t.integer "quiz_id", null: false
+    t.integer "score", default: 0
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["quiz_id"], name: "index_quiz_sessions_on_quiz_id"
+    t.index ["user_id"], name: "index_quiz_sessions_on_user_id"
   end
 
   create_table "quizzes", force: :cascade do |t|
@@ -49,4 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_07_151558) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["nickname"], name: "index_users_on_nickname", unique: true
   end
+
+  add_foreign_key "quiz_sessions", "quizzes"
+  add_foreign_key "quiz_sessions", "users"
 end

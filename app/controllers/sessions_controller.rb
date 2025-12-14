@@ -8,7 +8,7 @@ class SessionsController < ApplicationController
     password = params[:password]
 
     if email.blank? || password.blank?
-      flash.now[:alert] = "Заполните все поля"
+      flash.now[:alert] = "Fill in all fields"
       render :new, status: :unprocessable_entity
       return
     end
@@ -16,13 +16,13 @@ class SessionsController < ApplicationController
     user = User.find_by(email: email)
 
     unless user
-      flash.now[:alert] = "Такой пользователь не найден"
+      flash.now[:alert] = "This user was not found"
       render :new, status: :unprocessable_entity
       return
     end
     
     unless user.authenticate(password)
-      flash.now[:alert] = "Неверный пароль"
+      flash.now[:alert] = "Wrong password"
       render :new, status: :unprocessable_entity
       return
     end
@@ -30,11 +30,11 @@ class SessionsController < ApplicationController
 
     
     session[:user_id] = user.id
-    redirect_to root_path, notice: "Вход выполнен успешно!"
+    redirect_to root_path, notice: "Login successful"
   end
 
   def destroy
     session[:user_id] = nil
-    redirect_to root_path, notice: "Вы вышли из системы"
+    redirect_to root_path, notice: "You are logged out"
   end
 end
