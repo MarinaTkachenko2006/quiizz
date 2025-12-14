@@ -78,18 +78,54 @@
       
       .btn-outline {
         background: transparent;
-        color: #555;
-        border: 1px solid #ddd;
+        color: #555555;
+        border: 1px solid #dddddd;
       }
       
       .btn-outline:hover {
-        background: #f5f5f5;
+        background: #F5F5F5;
       }
       
       .main-content {
         background: #FFFFFF;
         padding: 2rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: none; /* ВАЖНО: по умолчанию скрыто */
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      
+      .modal {
+        background: white;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        width: 90%;
+        max-width: 400px;
+      }
+      
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+      
+      .modal-cross {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666666;
       }
     </style>
   </head>
@@ -100,7 +136,8 @@
         
         <nav class="nav">
           <% if logged_in? %>
-            <%= link_to "Все квизы", quizzes_path, class: "nav-link" %>
+            <%= link_to "Создать квиз", new_quiz_path, class: "nav-link" %>
+            <a href="#" class="nav-link" onclick="openJoinModal()">Подключиться к квизу</a>
             <%= link_to "Личный кабинет", profile_path, class: "nav-link" %>
             <%= button_to "Выйти", logout_path, method: :delete, class: "btn btn-outline", form: { style: "display: inline;" } %>
           <% else %>
@@ -111,6 +148,26 @@
       </div>
     </header>
 
+    <div id="joinModal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Подключиться к квизу</h3>
+          <button class="modal-cross" onclick="closeJoinModal()">&times;</button>
+        </div>
+        
+        <form id="joinQuizForm">
+          <div>
+            <input type="text" id="quizCode" placeholder="Введите код квиза" required pattern="[0-9]+">
+            <small style="display: block; margin-top: 0.5rem;">Код квиза состоит только из цифр (например: 012345678)</small>
+          </div>
+          
+          <div class="form-group">
+            <button type="submit" class="btn" style="width: 100%;">Подключиться</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <div class="container">
       <% flash.each do |type, message| %>
         <div class="flash flash-<%= type %>">
@@ -118,9 +175,44 @@
         </div>
       <% end %>
 
-      <main class="main-content">
-        <%= yield %>
-      </main>
+      <main class="main-content"><%= yield %></main>
     </div>
+    
+    <script>
+      function openJoinModal() {
+        document.getElementById('joinModal').style.display = 'flex';
+        document.getElementById('quizCode').focus();
+      }
+      
+      function closeJoinModal() {
+        document.getElementById('joinModal').style.display = 'none';
+        document.getElementById('joinQuizForm').reset();
+      }
+      
+      document.getElementById('joinQuizForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const quizCode = document.getElementById('quizCode').value.trim();
+        
+        if (!quizCode) {
+          alert('Write quiz code');
+          return;
+        }
+
+        if (!/^\d+$/.test(quizCode)) {
+          alert('Quiz code must consist of numbers only');
+          return;
+        }
+        
+        window.location.href = `/quizzes/${quizCode}`;
+      });
+      
+      document.getElementById('joinModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeJoinModal();
+        }
+      });
+    </script>
+    
   </body>
 </html>
