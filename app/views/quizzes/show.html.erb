@@ -1,6 +1,20 @@
 <div id="quiz-container" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
   <div class="max-w-4xl mx-auto">
     
+      <!--Сообщение о повторном прохождении-->
+    <% if @already_completed && !is_author %>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+        <div class="flex items-center">
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-yellow-800">Вы уже проходили этот квиз</h3>
+            <div class="mt-2 text-yellow-700">
+              <p>Ваш результат: <%= @score %> очков, <%= @correct_answers %> правильных ответов (<%= @accuracy %>% точности)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
     <div id="quiz-header" class="bg-white rounded-2xl shadow-lg p-6 mb-8">
       <div class="flex justify-between items-start">
         <div>
@@ -10,492 +24,493 @@
           <% end %>
         </div>
         
-        <div id="timer-container" class="<%= is_author ? '' : 'hidden' %>">
-          <div class="text-center">
-            <div class="text-sm text-gray-500 mb-1">Осталось времени</div>
-            <div id="timer" class="text-2xl font-bold text-emerald-600">00:30</div>
-          </div>
+        <div id="quiz-code" class="bg-gray-100 px-4 py-2 rounded-lg">
+          <div class="text-sm text-gray-500">Код квиза: <%= @quiz.id %></div>
         </div>
       </div>
       
       <div class="mt-6">
-        <div class="flex justify-between text-sm text-gray-600 mb-2">
-          <span>Вопрос <span id="current-question">1</span> из <%= @questions.count %></span>
-          <% if !is_author %>
-            <span><span id="score">0</span> очков</span>
-          <% end %>
+        <div id="participants-container" class="hidden mb-4">
+          <div class="text-sm text-gray-600 mb-2">Участники:</div>
+          <div id="participants-list" class="flex flex-wrap gap-2"></div>
         </div>
+        
         <div class="w-full bg-gray-200 rounded-full h-2.5">
           <div id="progress-bar" class="bg-emerald-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
       </div>
     </div>
     
-    <% if is_author %>
-      <div id="quiz-management-container" class="mb-6">
-        <div class="author-controls p-4 bg-gray-50 rounded-xl border border-gray-200">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold text-gray-700">Управление квизом</h3>
-            <div class="flex space-x-3">
-              <button type="button" 
-                      id="pause-quiz-btn" 
-                      onclick="togglePause()"
-                      class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
-                <span id="pause-text">Пауза</span>
-              </button>
-                      
-              <button type="button" 
-                      id="next-question-btn" 
-                      onclick="authorNextQuestion()"
-                      class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition">
-                Следующий вопрос
-              </button>
-            </div>
-          </div>
-                  
-          <div class="text-sm text-gray-600 space-y-1">
-            <div id="pause-status" class="hidden">
-              <span class="inline-flex items-center">
-                Квиз на паузе
-              </span>
-            </div>
-            <div>
-              Текущий вопрос: <span id="author-current-question">1</span> из <%= @questions.count %>
-            </div>
-          </div>
-        </div>
-      </div>
-    <% end %>
-
-    <% if is_author %>
-      <div id="questions-container">
-        <% @questions.each_with_index do |question, index| %>
-          <div id="question-<%= question.id %>" class="question-card <%= index == 0 ? '' : 'hidden' %>" 
-               data-question-id="<%= question.id %>" 
-               data-time-limit="<%= question.time_limit %>"
-               data-correct-answers="<%= question.correct_answer_count %>">
-            
-            <div class="bg-white rounded-2xl shadow-lg p-8">
-              <div class="mb-8">
-                <div class="flex items-center mb-4">
-                  <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-800 rounded-full text-lg font-bold mr-4">
-                    <%= index + 1 %>
-                  </span>
-                  <h2 class="text-2xl font-bold text-gray-900"><%= question.text %></h2>
-                </div>
-                
-                <div class="flex items-center text-gray-500 text-sm mt-2">
-                  <span class="mr-4">Лимит времени: <%= question.time_limit %> секунд</span>
-                  <span>Баллы: <%= question.reward %></span>
-                </div>
-              </div>
-
-              <div class="space-y-4">
-                <div class="text-sm font-medium text-gray-700 mb-2">Варианты ответов:</div>
-                <% question.answers.each.with_index do |answer, index| %>
-                  <div class="w-full text-left p-4 <%= answer.is_correct ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200' %> rounded-xl">
-                    <div class="flex items-center">
-                      <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full <%= answer.is_correct ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' %> mr-4">
-                        <span class="font-medium">
-                          <%= ('А'..'Я').to_a[index] %>
-                        </span>
-                      </div>
-                      <span class="text-lg text-gray-800"><%= answer.answer_text %></span>
-                      <% if answer.is_correct %>
-                        <span class="ml-auto text-green-600 font-medium">✓ Правильный</span>
-                      <% end %>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% else %>
-      <div id="questions-container">
-        <% @questions.each_with_index do |question, index| %>
-          <div id="question-<%= question.id %>" class="question-card <%= index == 0 ? '' : 'hidden' %>" 
-               data-question-id="<%= question.id %>" 
-               data-time-limit="<%= question.time_limit %>"
-               data-correct-answers="<%= question.correct_answer_count %>"
-               data-reward="<%= question.reward %>">
-            
-            <div class="bg-white rounded-2xl shadow-lg p-8">
-              <div class="mb-8">
-                <div class="flex items-center mb-4">
-                  <span class="inline-flex items-center justify-center w-10 h-10 bg-emerald-100 text-emerald-800 rounded-full text-lg font-bold mr-4">
-                    <%= index + 1 %>
-                  </span>
-                  <h2 class="text-2xl font-bold text-gray-900"><%= question.text %></h2>
-                </div>
-                
-                <div class="flex items-center text-gray-500 text-sm mt-2">
-                  <span class="mr-4"><%= question.time_limit %> секунд</span>
-                  <span><%= question.reward %> очков</span>
-                </div>
-              </div>
-
-              <div id="answers-<%= question.id %>" class="space-y-4">
-                <% question.answers.shuffle.each.with_index do |answer, index| %>
-                  <button type="button" 
-                          class="answer-btn w-full text-left p-4 bg-gray-50 hover:bg-gray-100 border-2 border-transparent hover:border-gray-300 rounded-xl transition-all duration-200"
-                          data-answer-id="<%= answer.id %>"
-                          data-is-correct="<%= answer.is_correct %>"
-                          onclick="selectAnswer(this, <%= answer.id %>, <%= answer.is_correct %>, <%= question.id %>)">
-                    <div class="flex items-center">
-                      <div class="answer-circle flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 mr-4 transition-all duration-200">
-                        <span class="text-gray-600 font-medium">
-                          <%= ('А'..'Я').to_a[index] %>
-                        </span>
-                      </div>
-                      <span class="text-lg text-gray-800"><%= answer.answer_text %></span>
-                    </div>
-                  </button>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-
-    <div id="results-container" class="hidden">
-      <div class="bg-white rounded-2xl shadow-lg p-8 text-center">
+    <!--Экран ожидания-->
+    <div id="waiting-screen" class="text-center py-16">
+      <div class="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto">
         <div class="mb-8">
-          <div class="inline-flex items-center justify-center w-20 h-20 bg-emerald-100 rounded-full mb-6">
-          </div>
-          <h2 class="text-3xl font-bold text-gray-900 mb-4">Квиз завершён!</h2>
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">Ожидание начала квиза</h2>
+          <p class="text-gray-600 mb-6" id="waiting-message">
+            <% if is_author %>Дождитесь подключения участников и запустите квиз<% end %>
+          </p>
+          
+          <div id="participants-count" class="text-lg font-semibold text-purple-600 mb-2">Участников: <span id="participants-count-number">1</span></div>
         </div>
-
-        <% if is_author %>
-          <p class="text-gray-600 mb-6">Все участники завершили прохождение квиза.</p>
-        <% else %>
-          <div class="bg-purple-50 p-6 rounded-xl">
-            <div class="text-4xl font-bold text-purple-600" id="final-questions"><%= @questions.count %></div>
-            <div class="text-purple-500 mt-2">Общее количество вопросов: </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 mt-6">
-            <div class="bg-blue-50 p-6 rounded-xl">
-              <div class="text-4xl font-bold text-blue-600" id="final-correct">0</div>
-              <div class="text-blue-500 mt-2">Верных ответов: </div>
-            </div>
-            
-            <div class="bg-emerald-50 p-6 rounded-xl">
-              <div class="text-4xl font-bold text-emerald-600" id="final-score">0</div>
-              <div class="text-emerald-500 mt-2">Сумма очков: </div>
-            </div>
-          </div>
+        
+        <% if is_author && !@already_completed %>
+          <button id="start-quiz-btn" 
+                  onclick="startQuiz()"
+                  class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">Начать квиз</button>
+        <% end %>
+        
+        <% if !is_author && !@already_completed %>
+          <div class="text-sm text-gray-500">Вы присоединились к квизу. Ожидайте начала.</div>
         <% end %>
       </div>
+    </div>
+    
+    <!-- Управление квизом-->
+    <div id="quiz-management-container" class="hidden mb-6">
+      <div class="author-controls p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-700">Управление квизом</h3>
+          <div class="flex space-x-3">
+            <button type="button" 
+                    id="pause-quiz-btn" 
+                    onclick="togglePause()"
+                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition">
+              <span id="pause-text">Пауза</span>
+            </button>
+                    
+            <button type="button" 
+                    id="next-question-btn" 
+                    onclick="nextQuestion()"
+                    class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition">Следующий вопрос</button>
+          </div>
+        </div>
+                
+        <div class="text-sm text-gray-600 space-y-1">
+          <div id="pause-status" class="hidden">
+            <span class="inline-flex items-center">
+              Квиз на паузе
+            </span>
+          </div>
+          <div>
+            Текущий вопрос: <span id="author-current-question">-</span> из <%= @questions.count %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Контейнер для вопросов -->
+    <div id="questions-container" class="hidden">
+      <!-- Вопросы будут загружаться динамически через WebSocket -->
+    </div>
+
+    <!-- Контейнер для результатов -->
+    <div id="results-container" class="hidden">
+      <!-- Результаты будут загружаться динамически -->
     </div>
   </div>
 </div>
 
+<%= action_cable_meta_tag %>
+<!-- Action Cable через CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.1.2/app/assets/javascripts/actioncable.js"></script>
+
 <script>
-  let currentQuestionNumber = 1;
-  let totalQuestions = <%= @questions.count %>;
-  let score = 0;
-  let correctAnswersCount = 0;
-  let timer = null;
-  let selectedAnswers = [];
-  let isPaused = false;
-  let pauseTimer = null;
+window.quizId = <%= @quiz.id %>;
+let quizChannel = null;
+let currentQuestion = 1;
+let totalQuestions = <%= @questions.count %>;
+let participants = [];
+let questionTimer = null;
+let timeLeft = 0;
 
-  function togglePause() {
-    const pauseBtn = document.getElementById('pause-quiz-btn');
-    const pauseText = document.getElementById('pause-text');
-    const pauseStatus = document.getElementById('pause-status');
-    
-    isPaused = !isPaused;
-    
-    if (isPaused) {
-      clearInterval(timer);
-      pauseText.textContent = 'Продолжить';
-      pauseStatus.classList.remove('hidden');
-      pauseBtn.classList.remove('bg-blue-500');
-      pauseBtn.classList.add('bg-yellow-500');
-      
-      const timerElement = document.getElementById('timer');
-      const timeStr = timerElement.textContent;
-      const [minutes, seconds] = timeStr.split(':').map(Number);
-      pauseTimer = minutes * 60 + seconds;
-      
-    } else {
-      pauseText.textContent = 'Пауза';
-      pauseStatus.classList.add('hidden');
-      pauseBtn.classList.remove('bg-yellow-500');
-      pauseBtn.classList.add('bg-blue-500');
-      
-      if (pauseTimer > 0) {
-        startTimerWithTime(pauseTimer);
-      } else {
-        startTimer();
-      }
+document.addEventListener('DOMContentLoaded', function() {
+  const cableUrl = window.CABLE_URL || '/cable';
+  window.App = { cable: ActionCable.createConsumer(cableUrl) };
+  
+  // Подключаемся к каналу
+  quizChannel = App.cable.subscriptions.create({
+    channel: 'QuizChannel',
+    quiz_id: <%= @quiz.id %>
+  }, {
+      received: function(data) {
+      handleMessage(data);
     }
-  }
-
-  function startTimerWithTime(timeLeft) {
-    const currentQuestion = document.querySelector('.question-card:not(.hidden)');
-    if (!currentQuestion) return;
-    
-    updateTimerDisplay(timeLeft);
-    
-    if (timer) clearInterval(timer);
-    
-    timer = setInterval(() => {
-      timeLeft--;
-      updateTimerDisplay(timeLeft);
-      
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        const questionId = currentQuestion.dataset.questionId;
-        timeUp(questionId);
-      }
-    }, 1000);
-  }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    startTimer();
-    updateAuthorCounter();
   });
   
-  function startTimer() {
-    const currentQuestion = document.querySelector('.question-card:not(.hidden)');
-    if (!currentQuestion) return;
-    
-    const timeLimit = parseInt(currentQuestion.dataset.timeLimit);
-    const questionId = currentQuestion.dataset.questionId;
-    
-    let timeLeft = timeLimit;
-    updateTimerDisplay(timeLeft);
-    
-    if (timer) clearInterval(timer);
-    
-    timer = setInterval(() => {
-      timeLeft--;
-      updateTimerDisplay(timeLeft);
+  window.quizChannel = quizChannel;
+});
+
+function handleMessage(data) {  
+  switch(data.action) {
+    case 'state_update':      
+      updateParticipants(data.participants || []);
+      break;
       
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        <% if !is_author %>
-          timeUp(questionId);
-        <% else %>
-          updateTimerDisplay(0);
-          timer = null;
-        <% end %>
-      }
-    }, 1000);
+    case 'quiz_started':
+      window.quizQuestions = data.questions;
+      window.totalQuestions = data.total_questions;
+      showQuizStarted();
+      if (<%= is_author %>)
+        showAuthorControls();
+      break;
+      
+    case 'next_question':     
+      window.currentQuestion = data.question_number;
+      showQuestion(data.question, data.question_number, data.total_questions);
+      break;
+      
+    case 'quiz_paused':
+      updatePauseState(true);
+      pauseTimer();
+      break;
+      
+    case 'quiz_resumed':
+      updatePauseState(false);
+      resumeTimer(); 
+      break;
+      
+    case 'quiz_ended':
+      stopTimer();
+      showResults(data.statistics);
+      break;
+  }
+
+}
+function startQuiz() {
+  
+  if (!<%= is_author %>)
+    return;
+  
+  if (!window.quizChannel){
+    alert('No connetction to the quiz');
+    return;
   }
   
-  function updateTimerDisplay(seconds) {
-    const timerElement = document.getElementById('timer');
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  window.quizChannel.perform('start_quiz', {
+    timestamp: new Date().toISOString(),
+    user_id: <%= current_user.id %>});
+}
+
+function startTimer(seconds) {
+  stopTimer(); // Останавливаем предыдущий таймер
+  timeLeft = seconds;
+  
+  const timerElement = document.getElementById('timer');
+  if (!timerElement) return;
+  
+  timerElement.textContent = formatTime(timeLeft);
+  
+  questionTimer = setInterval(() => {
+    timeLeft--;
+    timerElement.textContent = formatTime(timeLeft);
     
-    if (seconds <= 10) {
-      timerElement.classList.remove('text-emerald-600');
-      timerElement.classList.add('text-red-600');
+    if (timeLeft <= 0) {
+      stopTimer();
+      // Время вышло, автоматически блокируем ответы для участников
+      if (<%= !is_author %>) {
+        document.querySelectorAll('.answer-btn').forEach(btn => {
+          btn.disabled = true;
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+        });
+      }
+    }
+    
+    // Визуальная индикация при малом времени
+    if (timeLeft <= 5) {
+      timerElement.classList.add('text-red-600', 'font-bold');
     } else {
-      timerElement.classList.remove('text-red-600');
-      timerElement.classList.add('text-emerald-600');
+      timerElement.classList.remove('text-red-600', 'font-bold');
     }
-  }
-  
-  function timeUp(questionId) {
-    const answerBtns = document.querySelectorAll(`#answers-${questionId} .answer-btn`);
-    
-    answerBtns.forEach(btn => {
-      btn.disabled = true;
-      btn.classList.add('opacity-50');
-    });
-    
-    answerBtns.forEach(btn => {
-      if (btn.dataset.isCorrect === 'true') {
-        btn.classList.add('border-green-500', 'bg-green-50');
-      }
-    });
+  }, 1000);
+}
 
-    setTimeout(() => {
-      goToNextQuestion();
-    }, 2000);
-  }
-  
-  function selectAnswer(button, answerId, isCorrect, questionId) {
-    const questionElement = document.getElementById(`question-${questionId}`);
-    const requiredAnswers = parseInt(questionElement.dataset.correctAnswers);
-    
-    if (button.classList.contains('selected')) {
-      button.classList.remove('selected', 'bg-blue-100', 'border-blue-400');
-      selectedAnswers = selectedAnswers.filter(id => id !== answerId);
-      return;
-    }
-    button.classList.add('selected', 'bg-blue-100', 'border-blue-400');
-    selectedAnswers.push(answerId);
-    
-    if (selectedAnswers.length >= requiredAnswers) {
-      setTimeout(() => {
-        checkAnswers(questionId);
-      }, 500);
-    }
-  }
-  
-  function checkAnswers(questionId) {
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
-    
-    const questionElement = document.getElementById(`question-${questionId}`);
-    const answerBtns = document.querySelectorAll(`#answers-${questionId} .answer-btn`);
-    const requiredAnswers = parseInt(questionElement.dataset.correctAnswers);
-    const questionReward = parseInt(questionElement.dataset.reward) || 10;
-    
-    answerBtns.forEach(btn => {
-      btn.disabled = true;
-    });
-    
-    let correctSelected = 0;
-    let totalCorrect = 0;
-    
-    answerBtns.forEach(btn => {
-      const isCorrect = btn.dataset.isCorrect === 'true';
-      const wasSelected = selectedAnswers.includes(parseInt(btn.dataset.answerId));
-      
-      if (isCorrect) {
-        totalCorrect++;
-        btn.classList.add('border-green-500');
-        
-        if (wasSelected) {
-          correctSelected++;
-          btn.classList.add('bg-green-100');
-        } else {
-          btn.classList.add('bg-green-50');
-        }
-      } else if (wasSelected) {
-        btn.classList.add('border-red-300', 'bg-red-100');
-      }
-    });
-    
-    if (correctSelected === requiredAnswers && correctSelected === totalCorrect) {
-      score += questionReward;
-      correctAnswersCount++;
-      
-      <% if !is_author %>
-        document.getElementById('score').textContent = score;
-      <% end %>
-    }
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
 
-    setTimeout(() => {
-      goToNextQuestion();
-    }, 2000);
+function stopTimer() {
+  if (questionTimer) {
+    clearInterval(questionTimer);
+    questionTimer = null;
+  }
+}
+
+function pauseTimer() {
+  if (questionTimer) {
+    clearInterval(questionTimer);
+    questionTimer = null;
+  }
+}
+
+function resumeTimer() {
+  if (timeLeft > 0) {
+    startTimer(timeLeft);
+  }
+}
+
+
+function updateParticipants(participantsList) {
+  const count = document.getElementById('participants-count-number');
+  const list = document.getElementById('participants-list');
+  const container = document.getElementById('participants-container');
+  
+  if (count)
+    count.textContent = participantsList.length;
+  
+  if (list) {
+    list.innerHTML = '';
+    
+    participantsList.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'flex items-center bg-gray-100 px-3 py-1 rounded-full';
+      div.innerHTML = `
+        <div class="w-2 h-2 ${p.is_author ? 'bg-purple-500' : 'bg-green-500'} rounded-full mr-2"></div>
+        <span class="text-sm">${p.nickname}</span>`;
+      list.appendChild(div);
+    });
   }
   
-  function authorNextQuestion() {
-    if (isPaused) {
-      togglePause(); 
-    }
-    
-    const currentQuestion = document.querySelector('.question-card:not(.hidden)');
-    const questionId = currentQuestion.dataset.questionId;
-    
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
-    
-    <% if !is_author %>
-      const answerBtns = document.querySelectorAll(`#answers-${questionId} .answer-btn`);
-      answerBtns.forEach(btn => {
-        btn.disabled = true;
-        btn.classList.add('opacity-50');
-      });
-      
-      answerBtns.forEach(btn => {
-        if (btn.dataset.isCorrect === 'true') {
-          btn.classList.add('border-green-500', 'bg-green-50');
-        }
-      });
-    <% end %>
-    
+  if (container) {
+    if (participantsList.length > 1) container.classList.remove('hidden');
+    else container.classList.add('hidden');
+  }
+
+}
+
+
+function nextQuestion() {
+  if (!<%= is_author %>) return;
+  
+  window.quizChannel.perform('next_question', {
+    timestamp: new Date().toISOString(),
+    user_id: <%= current_user.id %>
+  });
+
+}
+function togglePause() {
+  if (!<%= is_author %>) return;
+  
+  const isPaused = document.getElementById('pause-text').textContent === 'Продолжить';
+  
+  window.quizChannel.perform('pause_quiz', {
+    paused: !isPaused,
+    timestamp: new Date().toISOString(),
+    user_id: <%= current_user.id %>
+  });
+}
+
+function selectAnswer(answerId, questionId) {
+  if (<%= is_author %>) return;
+  document.querySelectorAll('.answer-btn').forEach(btn => { btn.disabled = true; });
+  
+  stopTimer();
+  document.querySelectorAll('.answer-btn').forEach(btn => {
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+  });
+
+  
+  window.quizChannel.perform('submit_answer', {
+    question_id: questionId,
+    answer_id: answerId,
+    timestamp: new Date().toISOString(),
+    user_id: <%= current_user.id %>});
+
+}
+function showQuizStarted() {
+  document.getElementById('waiting-screen').classList.add('hidden');
+  document.getElementById('questions-container').classList.remove('hidden');
+  if (window.quizQuestions && window.quizQuestions.length > 0) {
     setTimeout(() => {
-      goToNextQuestion();
+      if (<%= is_author %>) nextQuestion();
     }, 1000);
   }
+}
 
-  function goToNextQuestion() {
-    const currentQuestion = document.querySelector('.question-card:not(.hidden)');
-    if (currentQuestion) {
-      currentQuestion.classList.add('hidden');
-    }
-    
-    currentQuestionNumber++;
-    
-    updateAuthorCounter();
-    updateProgress();
-    
-    if (currentQuestionNumber > totalQuestions) {
-      document.getElementById('progress-bar').style.width = '100%';
-      document.getElementById('current-question').textContent = totalQuestions;
+function showQuestion(questionData, questionNumber, total) {
+  const container = document.getElementById('questions-container');
+  
+  container.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center">
+            <span class="inline-flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-800 rounded-full text-lg font-bold mr-4">
+              ${questionNumber}
+            </span>
+            <h2 class="text-2xl font-bold text-gray-900">${questionData.text}</h2>
+          </div>
+          
+          <!-- ТАЙМЕР -->
+          <div class="flex items-center bg-gray-100 px-4 py-2 rounded-lg">
+            <span id="timer" class="text-xl font-bold text-gray-900">${formatTime(questionData.time_limit)}</span>
+          </div>
+        </div>
+        
+        <div class="flex items-center text-gray-500 text-sm">
+          <span>Всего времени: ${questionData.time_limit} сек.</span>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        ${questionData.answers.map((answer, index) => `
+          <button type="button" 
+                  onclick="selectAnswer(${answer.id}, ${questionData.id})"
+                  class="answer-btn w-full text-left p-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl transition">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-300 mr-4">
+                <span class="font-medium text-gray-600">
+                  ${String.fromCharCode(65 + index)}
+                </span>
+              </div>
+              <span class="text-lg text-gray-800">${answer.answer_text}</span>
+            </div>
+          </button>
+        `).join('')}
+      </div>
       
-      showResults();
-      return;
-    }
-    
-    const nextQuestion = document.querySelector(`.question-card:nth-child(${currentQuestionNumber})`);
-    if (nextQuestion) {
-      nextQuestion.classList.remove('hidden');
-      selectedAnswers = [];
+      <div class="mt-6 text-center text-gray-500 text-sm">
+        ${<%= is_author %> ? 'Участники отвечают...' : 'Выберите ответ'}
+      </div>
+    </div>
+  `;
+  
+  // Запускаем таймер (только для участников, автор не отвечает)
+  if (<%= !is_author %>) {
+    startTimer(questionData.time_limit);
+  }
+  
+  updateProgress(questionNumber, total);
+  
+  if (<%= is_author %>) {
+    document.getElementById('author-current-question').textContent = questionNumber;
+  }
+}
+
+function showResults(statistics) {
+  document.getElementById('questions-container').classList.add('hidden');
+  document.getElementById('quiz-management-container').classList.add('hidden');
+  document.getElementById('results-container').classList.remove('hidden');
+  
+  const container = document.getElementById('results-container');
+  
+  let html = `
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Квиз завершен!</h2>
       
-      if (isPaused) {
-        togglePause();
+      <div class="space-y-4">
+  `;
+  
+  statistics.forEach((stat, index) => {
+    const isCurrentUser = stat.user_id == <%= current_user.id %>;
+    const percentage = Math.round((stat.correct_answers / stat.total_questions) * 100);
+    
+    html += `
+      <div class="p-4 rounded-lg border ${isCurrentUser ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-semibold ${isCurrentUser ? 'text-blue-700' : 'text-gray-700'}">
+              ${stat.nickname} ${isCurrentUser ? '(Вы)' : ''}
+            </div>
+            <div class="text-sm text-gray-500">
+              ${stat.correct_answers} из ${stat.total_questions} правильных (${percentage}%)
+            </div>
+          </div>
+          <div class="text-xl font-bold text-emerald-600">
+            ${index + 1}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += `
+      </div>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+}
+
+function updatePauseState(isPaused) {
+  const btn = document.getElementById('pause-quiz-btn');
+  const text = document.getElementById('pause-text');
+  const status = document.getElementById('pause-status');
+  
+  if (!btn || !text || !status) return;
+  
+  if (isPaused) {
+    text.textContent = 'Продолжить';
+    status.classList.remove('hidden');
+    btn.classList.remove('bg-blue-500');
+    btn.classList.add('bg-yellow-500');
+    
+    // Для участников показываем сообщение о паузе
+    if (<%= !is_author %>) {
+      const questionsContainer = document.getElementById('questions-container');
+      if (questionsContainer) {
+        const pauseMessage = document.createElement('div');
+        pauseMessage.className = 'bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4 text-center';
+        pauseMessage.innerHTML = `
+          <div class="flex items-center justify-center">
+            <span class="text-yellow-800 font-medium">Квиз на паузе. Ожидайте продолжения...</span>
+          </div>
+        `;
+        questionsContainer.prepend(pauseMessage);
       }
-      
-      startTimer();
+    }
+  } else {
+    text.textContent = 'Пауза';
+    status.classList.add('hidden');
+    btn.classList.remove('bg-yellow-500');
+    btn.classList.add('bg-blue-500');
+    
+    // Убираем сообщение о паузе у участников
+    if (<%= !is_author %>) {
+      const pauseMessage = document.querySelector('.bg-yellow-50.border-yellow-200');
+      if (pauseMessage) {
+        pauseMessage.remove();
+      }
     }
   }
+}
 
-  function updateAuthorCounter() {
-    const authorCounter = document.getElementById('author-current-question');
-    if (authorCounter) {
-      authorCounter.textContent = currentQuestionNumber;
-    }
-  }
-
-  function updateProgress() {
-    const progress = ((currentQuestionNumber - 1) / totalQuestions) * 100;
-    document.getElementById('progress-bar').style.width = `${progress}%`;
-    document.getElementById('current-question').textContent = currentQuestionNumber;
+function updateProgress(current, total) {
+  const progress = ((current - 1) / total) * 100;
+  const progressBar = document.getElementById('progress-bar');
+  const currentQuestionEl = document.getElementById('current-question');
+  
+  if (progressBar) {
+    progressBar.style.width = `${progress}%`;
   }
   
-  function showResults() {
-    document.getElementById('questions-container').classList.add('hidden');
-    document.getElementById('quiz-header').classList.add('hidden');
-    
-    const quizManagementContainer = document.getElementById('quiz-management-container');
-    if (quizManagementContainer) {
-      quizManagementContainer.classList.add('hidden');
-    }
-    
-    document.getElementById('results-container').classList.remove('hidden');
-    
-    <% if !is_author %>
-      document.getElementById('final-correct').textContent = correctAnswersCount;
-      document.getElementById('final-score').textContent = score;
-      document.getElementById('final-questions').textContent = totalQuestions;
-    <% end %>
+  if (currentQuestionEl) {
+    currentQuestionEl.textContent = current;
   }
+}
+
+function updateStatus(status) {
+  const el = document.getElementById('connection-status');
+  if (el) {
+    el.textContent = status === 'connected' ? 'ПОДКЛЮЧЕН' : 'ОТКЛЮЧЕН';
+    el.className = status === 'connected' 
+      ? 'px-2 py-1 text-xs rounded bg-green-100 text-green-800' 
+      : 'px-2 py-1 text-xs rounded bg-red-100 text-red-800';
+  }
+}
+
+function showAuthorControls() {
+  document.getElementById('quiz-management-container').classList.remove('hidden');
+  if (container) container.classList.remove('hidden');
+
+  const btn = document.getElementById('start-quiz-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Квиз начат';
+    btn.classList.remove('bg-emerald-600');
+    btn.classList.add('bg-green-600');
+  }
+}
 </script>
-
-<style>
-  .answer-btn:disabled {
-    cursor: not-allowed;
-  }
-  
-  .answer-btn.selected {
-    border-color: #3b82f6 !important;
-    background-color: #dbeafe !important;
-  }
-</style>
