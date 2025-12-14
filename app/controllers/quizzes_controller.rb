@@ -11,7 +11,7 @@ class QuizzesController < ApplicationController
     @quiz = Quiz.find(params[:id])
     @questions = @quiz.questions.includes(:answers).order(:order_index)
     
-    @quiz_sessions = QuizzSession.find_by(:answer).order(:order_index)
+    @quiz_session = QuizSession.find_by(quiz_id: @quiz.id, user_id: current_user.id, is_completed: true)
     @already_completed = @quiz_session.present?
     
     if @already_completed
@@ -47,7 +47,7 @@ class QuizzesController < ApplicationController
   end
 
   helper_method :is_author
-  
+
   private
 
   def set_quiz
