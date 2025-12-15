@@ -11,6 +11,7 @@ class User < ApplicationRecord
 
   has_many :quizzes, foreign_key: 'author_id', dependent: :destroy
   has_many :scores, dependent: :destroy
+  has_many :quiz_sessions
 
   before_save :downcase_email
 
