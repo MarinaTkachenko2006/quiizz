@@ -13,29 +13,23 @@
 ActiveRecord::Schema[8.1].define(version: 2025_12_14_083834) do
   create_table "answers", force: :cascade do |t|
     t.string "answer_text", null: false
-    t.datetime "created_at", null: false
     t.boolean "is_correct", null: false
     t.integer "question_id", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "questions", force: :cascade do |t|
-    t.datetime "created_at", null: false
     t.integer "order_index", null: false
     t.string "quiz_id", null: false
     t.integer "reward", null: false
     t.string "text", null: false
     t.integer "time_limit", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "quiz_sessions", force: :cascade do |t|
-    t.datetime "created_at", null: false
     t.boolean "is_completed", default: false
     t.integer "number_correct_answers", default: 0
     t.string "quiz_id", null: false
     t.integer "score", default: 0
-    t.datetime "updated_at", null: false
     t.integer "user_id", null: false
   end
 
@@ -44,17 +38,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_14_083834) do
     t.datetime "created_at", null: false
     t.string "description"
     t.string "title", null: false
-    t.datetime "updated_at", null: false
     t.index ["title"], name: "index_quizzes_on_title"
   end
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.datetime "created_time", default: -> { "CURRENT_TIMESTAMP" }
     t.string "email", null: false
     t.string "nickname", null: false
     t.string "password_digest", null: false
-    t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["nickname"], name: "index_users_on_nickname", unique: true
   end
