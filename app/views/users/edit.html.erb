@@ -1,0 +1,31 @@
+<div style="max-width: 500px; margin: 0 auto;">
+  <h1 style="margin-bottom: 1.5rem; color: #333;">Редактирование профиля</h1>
+  
+  <%= form_with model: @user, url: profile_path, method: :patch do |form| %>
+    <% if @user.errors.any? %>
+      <div style="background: #f8d7da; color: #FF0000; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+        <strong>Пожалуйста, исправьте ошибки:</strong>
+        <ul style="margin-left: 1.5rem;">
+          <% @user.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div style="margin-bottom: 1.5rem;">
+      <%= form.label :nickname, "Имя пользователя" %>
+      <%= form.text_field :nickname %>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <%= form.label :email, "Почта" %>
+      <%= form.email_field :email %>
+    </div>
+
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <%= form.submit "Сохранить изменения", class: "btn-small" %>
+      <%= link_to "Отмена", profile_path, class: "btn-small btn-small-outline" %>
+    </div>
+  <% end %>
+</div>

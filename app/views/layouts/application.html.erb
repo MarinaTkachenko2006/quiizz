@@ -1,44 +1,284 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Quiizz" %></title>
+    <title>Quiizz</title>
+    
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Quiizz">
-    <meta name="mobile-web-app-capable" content="yes">
+    
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <%= action_cable_meta_tag %>
+    
+    <style>
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+      
+      .header {
+        border-bottom: 1px solid;
+        padding: 1.5rem 0;
+        margin-bottom: 3rem;
+      }
+      
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+      }
+      
+      .logo {
+        font-size: 1.8rem;
+        color: #800080;
+        text-decoration: none;
+      }
 
-    <%= yield :head %>
+      .logo-link:hover{
+        color: #8A2BE2;
+      }
+      
+      .nav {
+        display: flex;
+        gap: 2.5rem;
+        align-items: center;
+      }
+      
+      .nav-link {
+        color: #800080;
+        text-decoration: none;
+        padding: 0.5rem 0;
+        transition: color 0.2s;
+      }
+      
+      .nav-link:hover {
+        color: #8A2BE2;
+      }
+      
+      .btn {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        background: #DDA0DD;
+        color: #FFFFFF;
+        text-decoration: none;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+        margin: 0.35rem 0;
+      }
+      
+      .btn:hover {
+        background: #D8BFD8;
+      }
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+      .btn-small {
+        display: inline-block;
+        padding: 0.2rem 0.4rem;
+        background: transparent;
+        color: #666666;
+        text-decoration: none;
+        border-radius: 3px;
+        border: 1px solid #CCCCCC;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+        margin: 0.35rem 0;
+      }
 
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+      .btn-small:hover {
+        background: #F0F0F0;
+        color: #800080;
+        border-color: #800080;
+      }
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
+      .hidden {
+        display: none !important;
+      }
+      
+      .btn-outline {
+        background: transparent;
+        color: #555555;
+        border: 1px solid #dddddd;
+        padding: 0.6rem 1.2rem;
+        margin: 0.8rem 0;
+        border-radius: 8px;
+      }
+      
+      .btn-outline:hover {
+        background: #F5F5F5;
+      }
+      
+      .main-content {
+        background: #FFFFFF;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        border-radius: 8px;
+        margin: 2rem 0; 
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      
+      .modal {
+        background: white;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        width: 90%;
+        max-width: 400px;
+        border-radius: 8px;
+      }
+      
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+      
+      .modal-cross {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666666;
+      }
+
+      .flash {
+        padding: 1.2rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        border: 1px solid;
+      }
+
+      .flash-success {
+        background-color: #F0FFF4;
+        border-color: #9ae6b4;
+        color: #22543d;
+      }
+
+      .flash-error {
+        background-color: #FFF5F5;
+        border-color: #fc8181;
+        color: #c53030;
+      }
+
+      .flash-notice {
+        background-color: #ebf8ff;
+        border-color: #90cdf4;
+        color: #2c5282;
+      }
+
+      .answer-btn {
+        transition: all 0.2s;
+      }
+
+      .answer-btn:hover {
+        background-color: #f8f8f8;
+      }
+
+      .answer-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    </style>
   </head>
-
-  <body class="font-sans bg-gray-50 min-h-screen">
-    <nav class="bg-emerald-800 shadow-lg">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="flex justify-between h-16">
-          <div class="shrink-0 flex items-center">
-            <a href="<%= root_path %>"
-              class="text-4xl font-bold text-white">Quiizz</a>
-          </div>
-        </div>
-      </div>
-    </nav>
-  </body>
-
   <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
-    </main>
+    <header class="header">
+      <div class="container header-content">
+        <%= link_to "Quiizz", root_path, class: "logo" %>
+        
+        <nav class="nav">
+          <% if logged_in? %>
+            <%= link_to "Создать квиз", new_quiz_path, class: "nav-link" %>
+            <a href="#" class="nav-link" onclick="openJoinModal()">Подключиться к квизу</a>
+            <%= link_to "Личный кабинет", profile_path, class: "nav-link" %>
+            <%= button_to "Выйти", logout_path, method: :delete, class: "btn btn-outline", form: { style: "display: inline;" } %>
+          <% else %>
+            <%= link_to "Войти", login_path, class: "nav-link" %>
+            <%= link_to "Регистрация", register_path, class: "btn" %>
+          <% end %>
+        </nav>
+      </div>
+    </header>
+
+    <div id="joinModal" class="modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 style="margin: 0; font-size: 1.25rem;">Подключиться к квизу</h3>
+          <button class="modal-cross" onclick="closeJoinModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666; padding: 0; margin: 0; line-height: 1;">
+            &times;
+          </button>
+        </div>
+        
+        <form id="joinQuizForm" style="margin-top: 1.5rem;">
+          <div style="margin-bottom: 1.25rem;">
+            <input type="text" 
+                  id="quizCode" 
+                  placeholder="Введите код квиза"
+                  style="width: 94%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem;">
+          </div>
+          
+          <div>
+            <button type="submit" 
+                    class="btn-small" 
+                    style="width: 100%; padding: 0.75rem; font-size: 1rem;">
+              Подключиться
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="container">
+      <% flash.each do |type, message| %>
+        <div class="flash flash-<%= type %>">
+          <%= message %>
+        </div>
+      <% end %>
+
+      <main class="main-content"><%= yield %></main>
+    </div>
+    
+    <script>
+      function openJoinModal() {
+        document.getElementById('joinModal').style.display = 'flex';
+        document.getElementById('quizCode').focus();
+      }
+      
+      function closeJoinModal() {
+        document.getElementById('joinModal').style.display = 'none';
+        document.getElementById('joinQuizForm').reset();
+      }
+      
+      document.getElementById('joinQuizForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const quizCode = document.getElementById('quizCode').value.trim();
+        
+        if (!quizCode) {
+          alert('Write quiz code');
+          return;
+        }
+        
+        window.location.href = `/quizzes?code=${quizCode}`;
+      });
+      
+      document.getElementById('joinModal').addEventListener('click', function(e) {
+        if (e.target === this)
+          closeJoinModal();
+      });
+    </script>
+    
   </body>
 </html>

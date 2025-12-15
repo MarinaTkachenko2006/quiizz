@@ -1,0 +1,154 @@
+<div class="min-h-screen py-8 px-4">
+  <div class="container mx-auto">
+    <div class="text-center mb-10">
+      <h1 class="text-3xl font-bold text-gray-900">Создание квиза</h1>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-8">
+      <%= form_with(model: @quiz, id: "quiz-form") do |f| %>
+        <%= render "quiz_fields", f: f %>
+        
+        <div class="mb-10">
+          <div class="flex justify-center mb-8">
+            <button type="button" class="btn" onclick="addQuestion()">Добавить вопрос</button>
+          </div>
+        </div>
+
+        <div id="questions-container" class="space-y-8"></div>
+
+        <div class="mt-12 pt-8 border-t border-gray-300">
+          <%= f.submit "Создать квиз", 
+                class: "btn w-full" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= render "question_template" %>
+<%= render "answer_template" %>
+
+<script>
+
+   if (typeof questionCounter === 'undefined')
+    questionCounter = <%= @quiz.questions.size || 0 %>;
+  
+  if (typeof answerCounters === 'undefined')
+    answerCounters = {};
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    if (Object.keys(answerCounters).length === 0) {
+      const questions = document.querySelectorAll('.question-item');
+      questions.forEach((question) => {
+        const questionIndex = getQuestionIndex(question);
+        if (questionIndex !== null) {
+          const answers = question.querySelectorAll('.answer-item').length;
+          answerCounters[questionIndex] = answers;
+          if (questionIndex > questionCounter)
+            questionCounter = questionIndex;
+        }
+      });
+      
+      if (questions.length === 0)
+        questionCounter = 0;
+    }
+  });
+
+  function addQuestion() {
+    ++questionCounter;
+    const questionTemplate = document.getElementById('question-template').innerHTML;
+    
+    let newHtml = questionTemplate.replace(/NEW_QUESTION_INDEX/g, questionCounter);
+
+    document.getElementById('questions-container').insertAdjacentHTML('beforeend', newHtml);
+    
+    const newQuestion = document.querySelector(`[name="quiz[questions_attributes][${questionCounter}][text]"]`).closest('.question-item');
+    if (newQuestion) {
+      newQuestion.setAttribute('data-question-index', questionCounter);
+      const title = newQuestion.querySelector('h3');
+      if (title) title.textContent = `Вопрос ${questionCounter}`;
+    }
+    
+    answerCounters[questionCounter] = 0;
+    addDefaultAnswers(questionCounter);
+  }
+  
+  function addDefaultAnswers(questionIndex) {
+    for (let i = 0; i < 2; ++i) addAnswerToQuestion(questionIndex);
+  }
+
+  function removeQuestion(button) {
+    const questionItem = button.closest('.question-item');
+    if (questionItem) {
+      const questionIndex = getQuestionIndex(questionItem);
+      if (questionIndex !== null)
+        delete answerCounters[questionIndex];
+
+      questionItem.remove();
+    }
+  }
+
+  function addAnswer(button) {
+    const questionItem = button.closest('.question-item');
+    const questionIndex = getQuestionIndex(questionItem);
+    
+    if (questionIndex !== null) {
+      addAnswerToQuestion(questionIndex);
+    }
+  }
+
+  function addAnswerToQuestion(questionIndex) {
+    const answerIndex = answerCounters[questionIndex] || 0;
+    const answerTemplate = document.getElementById('answer-template').innerHTML;
+    
+    let newAnswerHtml = answerTemplate
+      .replace(/QUESTION_INDEX/g, questionIndex)
+      .replace(/ANSWER_INDEX/g, answerIndex);
+
+    const questionItem = document.querySelector(`[data-question-index="${questionIndex}"]`);
+    if (questionItem) {
+      const container = questionItem.querySelector('.answers-container');
+      if (container) {
+        container.insertAdjacentHTML('beforeend', newAnswerHtml);
+        answerCounters[questionIndex] = answerIndex + 1;
+      }
+    } else {
+      const input = document.querySelector(`input[name="quiz[questions_attributes][${questionIndex}][text]"]`);
+      if (input) {
+        const container = input.closest('.question-item').querySelector('.answers-container');
+        if (container) {
+          container.insertAdjacentHTML('beforeend', newAnswerHtml);
+          answerCounters[questionIndex] = answerIndex + 1;
+        }
+      }
+    }
+  }
+  
+  function removeAnswer(button) {
+    const answerItem = button.closest('.answer-item');
+    if (answerItem) {
+      answerItem.remove();
+
+      const questionItem = answerItem.closest('.question-item');
+      if (questionItem) {
+        const questionIndex = getQuestionIndex(questionItem);
+        if (questionIndex !== null) {
+          const answersCount = questionItem.querySelectorAll('.answer-item').length;
+          answerCounters[questionIndex] = answersCount;
+        }
+      }
+    }
+  }
+  
+  function getQuestionIndex(questionElement) {
+    const dataIndex = questionElement.getAttribute('data-question-index');
+    if (dataIndex) return parseInt(dataIndex);
+    
+    const input = questionElement.querySelector('input[name*="questions_attributes"]');
+    if (input) {
+      const match = input.name.match(/questions_attributes\[(\d+)\]/);
+      return match ? parseInt(match[1]) : null;
+    }
+    return null;
+  }
+</script>

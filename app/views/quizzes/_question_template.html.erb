@@ -1,0 +1,46 @@
+<template id="question-template">
+  <div class="border border-gray-200 rounded-lg p-4 question-item" data-question-index="NEW_QUESTION_INDEX">
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg font-semibold text-gray-900">Вопрос NEW_QUESTION_INDEX</h3>
+    </div>
+    
+    <div class="space-y-4">
+      <div>
+        <input type="text" name="quiz[questions_attributes][NEW_QUESTION_INDEX][text]" 
+                rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                required placeholder="Напишите вопрос">
+        <button type="button" onclick="removeQuestion(this)"
+                class="btn-small">X</button>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <input type="number" 
+                 name="quiz[questions_attributes][NEW_QUESTION_INDEX][reward]"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                 min="0", placeholder="Баллы за вопрос">
+        </div>
+        
+        <div>
+          <input type="number" 
+                 name="quiz[questions_attributes][NEW_QUESTION_INDEX][time_limit]"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                 min="1", placeholder="Время в секундах">
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-6">
+      <div class="flex justify-between items-center mb-4">
+        <h4 class="text-md font-medium text-gray-700">Ответы</h4>
+        <button type="button" class="btn-small" 
+                class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                onclick="addAnswer(this)">Добавить вариант ответа
+        </button>
+      </div>
+      
+      <div class="space-y-3 answers-container">
+      </div>
+    </div>
+  </div>
+</template>

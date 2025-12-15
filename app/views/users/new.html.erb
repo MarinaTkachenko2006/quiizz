@@ -1,0 +1,49 @@
+<div style="max-width: 500px; margin: 0 auto;">
+  <h1 style="margin-bottom: 1.5rem; color: #333; text-align: center">Регистрация</h1>
+  
+  <%= form_with model: @user, url: register_path do |form| %>
+    <div style="margin-bottom: 1.5rem;">
+      <%= form.label :nickname, "Имя пользователя" %>
+      <%= form.text_field :nickname %>
+      <% if @user.errors[:nickname].any? %>
+        <div style="color: #FF0000; font-size: 0.9rem; margin-top: 0.5rem;">
+          <%= @user.errors[:nickname].join(", ") %>
+        </div>
+      <% end %>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+      <%= form.label :email, "Почта" %>
+      <%= form.email_field :email %>
+      <% if @user.errors[:email].any? %>
+        <div style="color: #FF0000; font-size: 0.9rem; margin-top: 0.5rem;">
+          <%= @user.errors[:email].join(", ") %>
+        </div>
+      <% end %>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+      <%= form.label :password, "Пароль" %>
+      <%= form.password_field :password %>
+      <% if @user.errors[:password].any? %>
+        <div style="color: #FF0000; font-size: 0.9rem; margin-top: 0.5rem;">
+          <%= @user.errors[:password].join(", ") %>
+        </div>
+      <% end %>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <%= form.label :password_confirmation, "Подтверждение пароля" %>
+      <%= form.password_field :password_confirmation %>
+      <% if @user.errors[:password_confirmation].any? %>
+        <div style="color: #FF0000; font-size: 0.9rem; margin-top: 0.5rem;">
+          <%= @user.errors[:password_confirmation].join(", ") %>
+        </div>
+      <% end %>
+    </div>
+
+    <div style="margin-top: 2rem; text-align: center">
+      <%= form.submit "Зарегистрироваться", class: "btn" %>
+    </div>
+  <% end %>
+</div>

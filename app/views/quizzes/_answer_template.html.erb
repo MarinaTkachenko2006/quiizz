@@ -1,0 +1,17 @@
+<template id="answer-template">
+  <div class="flex items-center gap-2 answer-item">
+    <input type="text"
+           name="quiz[questions_attributes][QUESTION_INDEX][answers_attributes][ANSWER_INDEX][answer_text]"
+           class="flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500"
+           placeholder="Вариант ответа">
+    
+    <input type="checkbox"
+           name="quiz[questions_attributes][QUESTION_INDEX][answers_attributes][ANSWER_INDEX][is_correct]"
+           value="1"
+           class="h-5 w-5 text-purple-600 border-gray-300 rounded">
+    
+    <button type="button" 
+            onclick="removeAnswer(this)"
+            class="btn-small">X</button>
+  </div>
+</template>

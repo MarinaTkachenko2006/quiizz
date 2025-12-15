@@ -1,0 +1,54 @@
+<div id="quiz-container" class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+
+  <% if @already_completed && !is_author %>
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.282 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-medium text-yellow-800">Вы уже проходили этот квиз</h3>
+            <div class="mt-2 text-yellow-700">
+              <p>Ваш результат: <%= @score %> очков, <%= @correct_answers %> правильных ответов (<%= @accuracy %>% точности)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+
+<div>
+  <h1 style="margin-bottom: 1.5rem;">Личный кабинет</h1>
+  
+  <div style="max-width: 600px;">    
+    <div>
+      <label>Имя пользователя</label>
+      <div style="padding: 0.8rem; background: #DCDCDC; border-radius: 6px">
+        <%= @user.nickname %>
+      </div>
+    </div>
+    
+    <div>
+      <label>Почта</label>
+      <div style="padding: 0.8rem; background: #DCDCDC; border-radius: 6px">
+        <%= @user.email %>
+      </div>
+    </div>
+    
+    <div>
+      <label>Дата регистрации</label>
+      <div style="padding: 0.8rem; background: #DCDCDC; border-radius: 6px">
+        <%= @user.created_at.strftime("%d.%m.%Y %H:%M") %>
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <%= link_to "Мои квизы", my_quizzes_path, class: "btn-small" %>
+      <%= link_to "Редактировать профиль", edit_profile_path, class: "btn-small" %>
+      <%= link_to "Сменить пароль", change_password_profile_path, class: "btn-small btn-small-outline" %>
+    </div>
+  </div>
+</div>

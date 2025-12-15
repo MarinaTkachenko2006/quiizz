@@ -1,0 +1,25 @@
+<div style="max-width: 500px; margin: 0 auto;">
+  <h1 style="margin-bottom: 1.5rem; color: #333; text-align: center">Вход в аккаунт</h1>
+  
+  <%= form_with url: login_path do |form| %>
+    <% if flash[:alert] %>
+      <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; border: 1px solid #f5c6cb;">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <div style="margin-bottom: 1.5rem;">
+      <%= form.label :email, "Почта" %>
+      <%= form.email_field :email, value: params[:email] %>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <%= form.label :password, "Пароль" %>
+      <%= form.password_field :password %>
+    </div>
+
+    <div style="margin-top: 2rem; text-align: center">
+      <%= form.submit "Войти", class: "btn" %>
+    </div>
+  <% end %>
+</div>
