@@ -3,6 +3,17 @@ class QuizChannel < ApplicationCable::Channel
     @quiz = Quiz.find(params[:quiz_id])
     @user = current_user
     @quiz_id = @quiz.id
+
+    quiz_status = Rails.cache.read("quiz_#{@quiz.id}_status")
+    if quiz_status == 'started' && @quiz.author_id != @user.id
+      transmit({
+        action: 'quiz_already_started',
+        message: 'Квиз уже начался. Новые участники не могут присоединиться.'
+      })
+      sleep 0.5
+      connection.close
+      return
+    end
     
     stream_from "quiz_#{@quiz.id}"
     
