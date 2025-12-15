@@ -1,16 +1,33 @@
 class Quiz < ApplicationRecord
-  belongs_to :author, class_name: 'User'
+  self.primary_key = 'id'
+
+  belongs_to :author, class_name: 'User', foreign_key: 'author_id'
   has_many :questions, dependent: :destroy
+  has_many :quiz_sessions, dependent: :destroy
+  has_many :participants, through: :quiz_sessions, source: :user
 
   accepts_nested_attributes_for :questions,
     allow_destroy: true,
     reject_if: proc { |attrs| attrs['text'].blank? }
   
-  validates :title, presence: true, length: { maximum: 100 }
-  validates :description, length: { maximum: 500 }
-  validates :code, presence: true, uniqueness: true, length: { is: 8 }
+  validates :title, 
+    presence: { message: "Укажите название квиза" },
+    length: { 
+      maximum: 100, 
+      message: "Название не должно превышать 100 символов" 
+    }
+  
+  validates :description, 
+    length: { 
+      maximum: 500, 
+      message: "Описание не должно превышать 500 символов" 
+    }
+  
+  validates :author_id, 
+    presence: { message: "Не указан автор" }
 
-  before_validation :generate_code, on: :create
+
+  before_create :generate_code
   
   scope :by_user, ->(user) { where(author_id: user.id) }
 
@@ -22,12 +39,10 @@ class Quiz < ApplicationRecord
   
   private
   
-  def generate_code
-    return if code.present?
-    
+  def generate_code   
     loop do
-      self.code = SecureRandom.alphanumeric(8).upcase
-      break unless Quiz.exists?(code: self.code)
+      self.id = SecureRandom.alphanumeric(8).upcase
+      break unless Quiz.exists?(id: self.id)
     end
   end
   

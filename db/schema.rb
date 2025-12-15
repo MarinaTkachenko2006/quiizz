@@ -22,7 +22,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_14_083834) do
   create_table "questions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "order_index", null: false
-    t.integer "quiz_id", null: false
+    t.string "quiz_id", null: false
     t.integer "reward", null: false
     t.string "text", null: false
     t.integer "time_limit", null: false
@@ -33,23 +33,19 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_14_083834) do
     t.datetime "created_at", null: false
     t.boolean "is_completed", default: false
     t.integer "number_correct_answers", default: 0
-    t.integer "quiz_id", null: false
+    t.string "quiz_id", null: false
     t.integer "score", default: 0
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
-    t.index ["quiz_id"], name: "index_quiz_sessions_on_quiz_id"
-    t.index ["user_id"], name: "index_quiz_sessions_on_user_id"
   end
 
-  create_table "quizzes", force: :cascade do |t|
+  create_table "quizzes", id: :string, force: :cascade do |t|
     t.integer "author_id", null: false
-    t.string "code", null: false
     t.datetime "created_at", null: false
     t.string "description"
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.index ["code"], name: "index_quizzes_on_code", unique: true
-    t.index ["title"], name: "index_quizzes_on_title", unique: true
+    t.index ["title"], name: "index_quizzes_on_title"
   end
 
   create_table "users", force: :cascade do |t|
@@ -63,6 +59,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_14_083834) do
     t.index ["nickname"], name: "index_users_on_nickname", unique: true
   end
 
+  add_foreign_key "answers", "questions"
+  add_foreign_key "questions", "quizzes"
   add_foreign_key "quiz_sessions", "quizzes"
   add_foreign_key "quiz_sessions", "users"
 end

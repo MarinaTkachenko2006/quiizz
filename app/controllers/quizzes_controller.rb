@@ -5,7 +5,7 @@ class QuizzesController < ApplicationController
 
   def index
     if params[:code].present?
-      @quiz = Quiz.find_by(code: params[:code].upcase)
+      @quiz = Quiz.find_by(id: params[:code].upcase)
       if @quiz
         redirect_to quiz_path(@quiz)
         return
@@ -26,7 +26,7 @@ class QuizzesController < ApplicationController
     
     if @already_completed
       @score = @quiz_session.score
-      @correct_answers = @quiz_session.correct_answers
+      @correct_answers = @quiz_session.number_correct_answers
       @accuracy = @quiz_session.accuracy
     end
   end
@@ -40,28 +40,34 @@ class QuizzesController < ApplicationController
   end
 
   def create
-    @quiz = Quiz.new(quiz_params)
-    @quiz.author_id = session[:user_id]
-    loop do
-      new_code = SecureRandom.alphanumeric(8).upcase
-      unless Quiz.exists?(code: new_code)
-        @quiz.code = new_code
-        break
+  @quiz = Quiz.new(quiz_params)
+  @quiz.author_id = session[:user_id]
+
+  if @quiz.save
+    redirect_to root_path, notice: 'Квиз создан'
+  else
+    error_messages = []
+    @quiz.errors.full_messages.each do |msg|
+      error_messages << msg unless msg.include?("Questions")
+    end
+    
+    @quiz.questions.each_with_index do |question, index|
+      unless question.valid?
+        question.errors.full_messages.each do |msg|
+          error_messages << "Вопрос #{index + 1}: #{msg}"
+        end
       end
     end
-
+    error_messages.uniq!
     
-    if @quiz.save
-      redirect_to root_path, notice: 'Quiz is created'
-    else
-      flash.now[:alert] = 'Could not create the quiz'
-      render :new, status: :unprocessable_entity
-    end
+    flash.now[:alert] = error_messages.join('. ')
+    render :new, status: :unprocessable_entity
   end
+end
 
   def destroy
     @quiz.destroy
-    redirect_to quizzes_url, notice: 'Quiz is deleted'
+    redirect_to quizzes_url, notice: 'Квиз удалён'
   end
 
   helper_method :is_author
@@ -78,7 +84,7 @@ class QuizzesController < ApplicationController
 
   def require_author
     unless session[:user_id] && @quiz && session[:user_id] == @quiz.author_id
-      redirect_to root_path, alert: 'Only author can modify quiz'
+      redirect_to root_path, alert: 'Только автор может менять квиз'
       return false
     end
     true
@@ -86,7 +92,7 @@ class QuizzesController < ApplicationController
   
   def user_autorized
     unless session[:user_id]
-      redirect_to login_path, alert: 'Please log in to access this page'
+      redirect_to login_path, alert: 'Авторизуйтесь на странице'
       return false
     end
     true
@@ -112,5 +118,4 @@ class QuizzesController < ApplicationController
       ]
     )
   end
-
 end

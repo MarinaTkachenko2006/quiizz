@@ -25,7 +25,7 @@
         </div>
         
         <div id="quiz-code" class="bg-gray-100 px-4 py-2 rounded-lg">
-          <div class="text-sm text-gray-500">Код квиза: <%= @quiz.code %></div>
+          <div class="text-sm text-gray-500">Код квиза: <%= @quiz.id %></div>
         </div>
       </div>
     
@@ -98,7 +98,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.1.2/app/assets/javascripts/actioncable.js"></script>
 
 <script>
-window.quizId = <%= @quiz.id %>;
+window.quizId = '<%= @quiz.id %>';
 let quizChannel = null;
 let currentQuestion = 1;
 let totalQuestions = <%= @questions.count %>;
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Подключаемся к каналу
   quizChannel = App.cable.subscriptions.create({
     channel: 'QuizChannel',
-    quiz_id: <%= @quiz.id %>
+    quiz_id: '<%= @quiz.id %>'
   }, {
       received: function(data) {
       handleMessage(data);
@@ -478,7 +478,7 @@ function updateStatus(status) {
 }
 
 function showAuthorControls() {
-  document.getElementById('quiz-management-container').classList.remove('hidden');
+  const container = document.getElementById('quiz-management-container').classList.remove('hidden');
   if (container) container.classList.remove('hidden');
 
   const btn = document.getElementById('start-quiz-btn');

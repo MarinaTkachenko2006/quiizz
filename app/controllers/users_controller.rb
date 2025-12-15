@@ -11,7 +11,7 @@ class UsersController < ApplicationController
     
     if @user.save
       session[:user_id] = @user.id
-      redirect_to root_path, notice: 'Registration successful'
+      redirect_to root_path, notice: 'Регистрация успешна'
     else
       render :new, status: :unprocessable_entity
     end
@@ -21,7 +21,7 @@ class UsersController < ApplicationController
     @user ||= current_user
 
     unless @user
-        flash[:alert] = "You are not logged in"
+        flash[:alert] = "Вы авторизовались"
         redirect_to login_path
         return
     end
@@ -33,7 +33,7 @@ class UsersController < ApplicationController
 
   def update
     if @user.update(user_update_params)
-        redirect_to profile_path, notice: 'Profile is updated'
+        redirect_to profile_path, notice: 'Профиль обновлён'
     else
         render :edit, status: :unprocessable_entity
     end
@@ -45,13 +45,13 @@ class UsersController < ApplicationController
   def update_password
     if @user.authenticate(params[:current_password])
       if @user.update(password: params[:new_password], password_confirmation: params[:password_confirmation])
-        redirect_to profile_path, notice: 'Password changed'
+        redirect_to profile_path, notice: 'Пароль изменён'
       else
-        flash.now[:alert] = 'Error changing password'
+        flash.now[:alert] = 'Ошибка при изменении пароля'
         render :change_password, status: :unprocessable_entity
       end
     else
-      flash.now[:alert] = 'The current password is wrong'
+      flash.now[:alert] = 'Неверный текущий пароль'
       render :change_password, status: :unprocessable_entity
     end
   end

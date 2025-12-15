@@ -1,18 +1,17 @@
 class CreateQuizzes < ActiveRecord::Migration[8.1]
   def change
-    create_table :quizzes do |t|
+    create_table :quizzes, id: false do |t|
+      t.string :id, primary_key: true, null: false
       t.string :title, null: false
       t.string :description
       t.integer :author_id, null: false
-      t.string :code, null: false
       t.timestamps
 
-      t.index :title, unique: true
-      t.index :code, unique: true
+      t.index :title
     end
 
     create_table :questions do |t|
-      t.integer :quiz_id, null: false
+      t.string :quiz_id, null: false
       t.string :text, null: false
       t.integer :time_limit, null: false
       t.integer :reward, null: false
@@ -27,5 +26,7 @@ class CreateQuizzes < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
+    add_foreign_key :questions, :quizzes
+    add_foreign_key :answers, :questions
   end
 end

@@ -10,13 +10,11 @@ class Question < ApplicationRecord
   validates :reward, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :time_limit, presence: true, numericality: { only_integer: true, greater_than: 0 }
   
+  validate :at_least_one_answer
+  validate :at_least_one_correct_answer
+  
   before_validation :set_defaults
   
-  
-  def correct_answer_count
-    correct_answers.count
-  end
-
   private
   
   def set_defaults
@@ -24,19 +22,16 @@ class Question < ApplicationRecord
     self.time_limit ||= 30
     self.order_index ||= 1 if self.order_index.blank?
   end
-
-  def correct_answers
-    answers.where(is_correct: true)
+  
+  def at_least_one_answer
+    if answers.empty? || answers.all? { |a| a.marked_for_destruction? || a.answer_text.blank? }
+      errors.add(:base, "Вопрос должен иметь хотя бы один ответ")
+    end
   end
   
-  
-  def check_answers(selected_answer_ids)
-    correct_ids = correct_answers.pluck(:id)
-    selected_ids = Array(selected_answer_ids).map(&:to_i)
-    {
-      selected: selected_ids,
-      correct: correct_ids,
-      is_correct: (selected_ids.sort == correct_ids.sort)
-    }
+  def at_least_one_correct_answer
+    if answers.none? { |a| a.is_correct && !a.marked_for_destruction? }
+      errors.add(:base, "Вопрос должен иметь хотя бы один правильный ответ")
+    end
   end
 end
