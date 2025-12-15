@@ -1,24 +1,32 @@
 # README
+Quizz — это интерактивная веб-платформа для создания и проведения онлайн-квизов в реальном времени. Платформа позволяет авторам создавать интерактивные викторины, а участникам — присоединяться к ним по уникальным кодам и соревноваться друг с другом.
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Backend:
+Ruby 3.2+ — основной язык программирования
+Rails 8.1+ — веб-фреймворк
+SQLite3 — база данных для разработки
+ActionCable — WebSocket для реального времени
+BCrypt — безопасное хранение паролей
+Redis - бэкенд для ActionCable
 
-Things you may want to cover:
+## Frontend
+HTML5 + ERB — шаблонизация
+CSS3 — стилизация
+Vanilla JavaScript — интерактивность
+ActionCable JS — клиентская часть WebSocket
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+## Возможности
+# Для создателей квизов:
+- Создание квизов с неограниченным количеством вопросов
+- Настройка времени на ответ для каждого вопроса
+- Установка наград за правильные ответы
+- Генерация уникальных кодов доступа
+- Управление квизом в реальном времени:
+- Старт/пауза квиза
+- Переход к следующему вопросу
+- Просмотр статистики участников
+# Для участников:
+- Быстрое подключение по коду
+- Синхронное участие в реальном времени
+- Ответы с ограничением по времени
+- Просмотр своего рейтинга
